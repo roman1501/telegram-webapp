@@ -91,17 +91,21 @@
       }
     }
 
-    async function updateClicks(newCount) {
-      await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
-        method: "PATCH",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ clicks: newCount })
-      });
-    }
+   async function updateClicks(newCount) {
+  const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
+    method: "PATCH",
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ clicks: newCount })
+  });
+
+  const result = await res.text();
+  console.log("PATCH result:", result);
+}
+
 
     let count = 0;
 
