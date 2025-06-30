@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <title>Натискач</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Хом'як Тапер</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    html, body {
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f1f1f1;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      background: #f1f1f1;
-      text-align: center;
-      height: 100%;
-      overflow: hidden;
-      touch-action: manipulation; /* 👈 дозволяє багатопальцеві тапи */
+      touch-action: manipulation;
     }
 
     h1 {
@@ -31,9 +29,7 @@
       border: none;
       border-radius: 16px;
       cursor: pointer;
-      transition: background 0.2s ease;
       user-select: none;
-      touch-action: manipulation;
     }
 
     .tap-button:active {
@@ -46,40 +42,79 @@
       font-size: 24px;
       color: #333;
     }
-
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 20px;
-        margin-top: 20px;
-      }
-
-      .tap-button {
-        font-size: 28px;
-        padding: 16px 40px;
-        margin-top: 30px;
-      }
-
-      .counter {
-        font-size: 20px;
-        margin-top: 20px;
-      }
-    }
   </style>
 </head>
 <body>
-  <h1>Натисни кнопку!</h1>
-  <button class="tap-button" ontouchstart="increment()">ТАП</button>
-  <div class="counter" id="counter">Кліків: 0</div>
+  <h1>Привіт, <span id="username">...</span>!</h1>
+  <button class="tap-button" id="tapBtn">ТАП</button>
+  <div class="counter" id="counter">Завантаження...</div>
 
   <script>
-    Telegram.WebApp.expand();
-    let count = 0;
-    const counter = document.getElementById("counter");
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-    function increment() {
-      count++;
-      counter.innerText = `Кліків: ${count}`;
+    const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
+
+    const user = tg.initDataUnsafe.user;
+    const userId = user.id;
+    const userName = user.first_name || "Гість";
+    const counterEl = document.getElementById("counter");
+    const btn = document.getElementById("tapBtn");
+
+    document.getElementById("username").innerText = userName;
+
+    // Завантаження кліків із Supabase
+    async function fetchClicks() {
+      const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`
+        }
+      });
+
+      const data = await res.json();
+      if (data.length > 0) {
+        return data[0].clicks;
+      } else {
+        // Створюємо новий запис
+        await fetch(`${supabaseUrl}/rest/v1/clicks`, {
+          method: "POST",
+          headers: {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ user_id: userId, clicks: 0 })
+        });
+        return 0;
+      }
     }
+
+    async function updateClicks(newCount) {
+      await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
+        method: "PATCH",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ clicks: newCount })
+      });
+    }
+
+    let count = 0;
+
+    fetchClicks().then((startCount) => {
+      count = startCount;
+      counterEl.innerText = `Кліків: ${count}`;
+    });
+
+    btn.addEventListener("click", () => {
+      count++;
+      counterEl.innerText = `Кліків: ${count}`;
+      updateClicks(count);
+    });
   </script>
 </body>
 </html>
