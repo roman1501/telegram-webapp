@@ -11,15 +11,36 @@
       text-align: center;
       background: #f1f1f1;
       margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .tab-content {
+      flex: 1;
       padding: 20px;
-      touch-action: manipulation;
+      display: none;
     }
-
-    h1 {
-      font-size: 24px;
-      margin-top: 40px;
+    .tab-content.active {
+      display: block;
     }
-
+    .tab-bar {
+      display: flex;
+      height: 60px;
+      background: #ffffff;
+      border-top: 1px solid #ccc;
+    }
+    .tab-button {
+      flex: 1;
+      font-size: 16px;
+      padding: 10px;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+    .tab-button.active {
+      background: #e0e0e0;
+    }
     .tap-button {
       font-size: 32px;
       padding: 20px 50px;
@@ -31,12 +52,10 @@
       cursor: pointer;
       user-select: none;
     }
-
     .tap-button:active {
       background-color: #388E3C;
       transform: scale(0.97);
     }
-
     .counter {
       margin-top: 30px;
       font-size: 24px;
@@ -45,9 +64,23 @@
   </style>
 </head>
 <body>
-  <h1>Привіт, <span id="username">...</span>!</h1>
-  <button class="tap-button" id="tapBtn">ТАП</button>
-  <div class="counter" id="counter">Завантаження...</div>
+  <div id="tap-tab" class="tab-content active">
+    <h1>Привіт, <span id="username">...</span>!</h1>
+    <button class="tap-button" id="tapBtn">ТАП</button>
+    <div class="counter" id="counter">Завантаження...</div>
+  </div>
+
+  <div id="exchange-tab" class="tab-content">
+    <h1>🎁 Обмін знижок</h1>
+    <div class="counter">Кліків: <span id="clicksDisplay">...</span></div>
+    <div class="counter">Знижок: <span id="discountsDisplay">...</span></div>
+    <button class="tap-button" id="exchangeBtn">Обміняти 1000 кліків на знижку 🎫</button>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-button active" onclick="showTab('tap-tab', this)">Тапати</button>
+    <button class="tab-button" onclick="showTab('exchange-tab', this)">Обмін</button>
+  </div>
 
   <script>
     const tg = window.Telegram.WebApp;
@@ -59,30 +92,32 @@
     const user = tg.initDataUnsafe?.user;
 
     if (!user) {
-      alert("Цей застосунок потрібно запускати через Telegram.");
-      throw new Error("Telegram user not found");
+      alert("Цей застосунок потрібно відкривати через Telegram.");
+      throw new Error("user not found");
     }
 
     const userId = user.id;
     const userName = user.first_name || "Гість";
     document.getElementById("username").innerText = userName;
 
-    const counterEl = document.getElementById("counter");
-    const btn = document.getElementById("tapBtn");
-    let count = 0;
+    let clicks = 0;
+    let discounts = 0;
 
-    async function fetchClicks() {
+    const counterEl = document.getElementById("counter");
+    const clicksDisplay = document.getElementById("clicksDisplay");
+    const discountsDisplay = document.getElementById("discountsDisplay");
+
+    async function fetchUserData() {
       const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
         headers: {
           apikey: supabaseKey,
           Authorization: `Bearer ${supabaseKey}`
         }
       });
-
       const data = await res.json();
-
       if (data.length > 0) {
-        return data[0].clicks;
+        clicks = data[0].clicks;
+        discounts = data[0].discounts;
       } else {
         await fetch(`${supabaseUrl}/rest/v1/clicks`, {
           method: "POST",
@@ -91,13 +126,19 @@
             Authorization: `Bearer ${supabaseKey}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ user_id: userId, clicks: 0 })
+          body: JSON.stringify({ user_id: userId, clicks: 0, discounts: 0 })
         });
-        return 0;
       }
+      updateDisplay();
     }
 
-    async function updateClicks(newCount) {
+    function updateDisplay() {
+      counterEl.innerText = `Кліків: ${clicks}`;
+      clicksDisplay.innerText = clicks;
+      discountsDisplay.innerText = discounts;
+    }
+
+    async function saveUserData() {
       await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
         method: "PATCH",
         headers: {
@@ -105,20 +146,41 @@
           Authorization: `Bearer ${supabaseKey}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ clicks: newCount })
+        body: JSON.stringify({ clicks, discounts })
       });
     }
 
-    fetchClicks().then((startCount) => {
-      count = startCount;
-      counterEl.innerText = `Кліків: ${count}`;
+    document.getElementById("tapBtn").addEventListener("click", () => {
+      clicks++;
+      updateDisplay();
+      saveUserData();
     });
 
-    btn.addEventListener("click", () => {
-      count++;
-      counterEl.innerText = `Кліків: ${count}`;
-      updateClicks(count);
+    document.getElementById("exchangeBtn").addEventListener("click", () => {
+      if (clicks >= 1000) {
+        clicks -= 1000;
+        discounts++;
+        updateDisplay();
+        saveUserData();
+        alert("🎉 Вітаємо! Ви отримали знижку 10% на квиток у кіно.");
+      } else {
+        alert("Недостатньо кліків. Потрібно 1000.");
+      }
     });
+
+    function showTab(tabId, buttonEl) {
+      document.querySelectorAll(".tab-content").forEach(tab => {
+        tab.classList.remove("active");
+      });
+      document.getElementById(tabId).classList.add("active");
+
+      document.querySelectorAll(".tab-button").forEach(btn => {
+        btn.classList.remove("active");
+      });
+      buttonEl.classList.add("active");
+    }
+
+    fetchUserData();
   </script>
 </body>
 </html>
