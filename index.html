@@ -2,22 +2,49 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Hello Telegram</title>
+  <title>Натискач</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       text-align: center;
-      margin-top: 50px;
+      background: #f1f1f1;
+      padding-top: 100px;
     }
-    button {
-      font-size: 18px;
-      padding: 10px 20px;
+    .tap-button {
+      font-size: 32px;
+      padding: 20px 50px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .tap-button:hover {
+      background-color: #45a049;
+    }
+    .counter {
+      margin-top: 40px;
+      font-size: 28px;
+      color: #333;
     }
   </style>
 </head>
 <body>
-  <h1>Привіт, Telegram!</h1>
-  <button onclick="alert('Це працює 🎉')">Натисни мене</button>
+  <h1>Натисни кнопку!</h1>
+  <button class="tap-button" onclick="increment()">ТАП</button>
+  <div class="counter" id="counter">Кліків: 0</div>
+
+  <script>
+    let count = 0;
+    function increment() {
+      count++;
+      document.getElementById("counter").innerText = `Кліків: ${count}`;
+    }
+
+    // Розгорнути WebApp на весь екран
+    Telegram.WebApp.expand();
+  </script>
 </body>
 </html>
