@@ -14,38 +14,33 @@
       padding: 20px;
       touch-action: manipulation;
     }
+
     h1 {
       font-size: 24px;
+      margin-top: 40px;
     }
+
     .tap-button {
       font-size: 32px;
       padding: 20px 50px;
-      margin-top: 30px;
-      background-color: red;
+      margin-top: 40px;
+      background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 16px;
       cursor: pointer;
       user-select: none;
     }
+
     .tap-button:active {
       background-color: #388E3C;
       transform: scale(0.97);
     }
+
     .counter {
       margin-top: 30px;
       font-size: 24px;
       color: #333;
-    }
-    .debug {
-      margin-top: 20px;
-      background: #eee;
-      color: #c00;
-      font-size: 14px;
-      white-space: pre-line;
-      padding: 10px;
-      border-radius: 8px;
-      max-width: 100%;
     }
   </style>
 </head>
@@ -53,7 +48,6 @@
   <h1>Привіт, <span id="username">...</span>!</h1>
   <button class="tap-button" id="tapBtn">ТАП</button>
   <div class="counter" id="counter">Завантаження...</div>
-  <div id="debug" class="debug">DEBUG:</div>
 
   <script>
     const tg = window.Telegram.WebApp;
@@ -62,14 +56,10 @@
     const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
 
-    const debugEl = document.getElementById("debug");
-    function log(msg) {
-      debugEl.innerText += "\n" + msg;
-    }
-
     const user = tg.initDataUnsafe?.user;
+
     if (!user) {
-      log("❌ user is undefined. Цей застосунок потрібно відкривати через Telegram.");
+      alert("Цей застосунок потрібно запускати через Telegram.");
       throw new Error("Telegram user not found");
     }
 
@@ -82,7 +72,6 @@
     let count = 0;
 
     async function fetchClicks() {
-      log("📥 fetchClicks...");
       const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
         headers: {
           apikey: supabaseKey,
@@ -91,13 +80,11 @@
       });
 
       const data = await res.json();
-      log("✅ fetch result: " + JSON.stringify(data));
 
       if (data.length > 0) {
         return data[0].clicks;
       } else {
-        log("🆕 Створюємо нового користувача...");
-        const insertRes = await fetch(`${supabaseUrl}/rest/v1/clicks`, {
+        await fetch(`${supabaseUrl}/rest/v1/clicks`, {
           method: "POST",
           headers: {
             apikey: supabaseKey,
@@ -106,15 +93,12 @@
           },
           body: JSON.stringify({ user_id: userId, clicks: 0 })
         });
-        const insertText = await insertRes.text();
-        log("POST result: " + insertText);
         return 0;
       }
     }
 
     async function updateClicks(newCount) {
-      log("📤 updateClicks: " + newCount);
-      const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
+      await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
         method: "PATCH",
         headers: {
           apikey: supabaseKey,
@@ -123,9 +107,6 @@
         },
         body: JSON.stringify({ clicks: newCount })
       });
-
-      const result = await res.text();
-      log("🛠 PATCH result: " + result);
     }
 
     fetchClicks().then((startCount) => {
