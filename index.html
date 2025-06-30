@@ -1,50 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
   <title>Натискач</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
-      text-align: center;
       background: #f1f1f1;
-      padding-top: 100px;
+      text-align: center;
+      height: 100%;
+      overflow: hidden;
+      touch-action: manipulation; /* 👈 дозволяє багатопальцеві тапи */
     }
+
+    h1 {
+      font-size: 24px;
+      margin-top: 40px;
+    }
+
     .tap-button {
       font-size: 32px;
       padding: 20px 50px;
+      margin-top: 40px;
       background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 16px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.2s ease;
+      user-select: none;
+      touch-action: manipulation;
     }
-    .tap-button:hover {
-      background-color: #45a049;
+
+    .tap-button:active {
+      background-color: #388E3C;
+      transform: scale(0.97);
     }
+
     .counter {
-      margin-top: 40px;
-      font-size: 28px;
+      margin-top: 30px;
+      font-size: 24px;
       color: #333;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 20px;
+        margin-top: 20px;
+      }
+
+      .tap-button {
+        font-size: 28px;
+        padding: 16px 40px;
+        margin-top: 30px;
+      }
+
+      .counter {
+        font-size: 20px;
+        margin-top: 20px;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Натисни кнопку!</h1>
-  <button class="tap-button" onclick="increment()">ТАП</button>
+  <button class="tap-button" ontouchstart="increment()">ТАП</button>
   <div class="counter" id="counter">Кліків: 0</div>
 
   <script>
+    Telegram.WebApp.expand();
     let count = 0;
+    const counter = document.getElementById("counter");
+
     function increment() {
       count++;
-      document.getElementById("counter").innerText = `Кліків: ${count}`;
+      counter.innerText = `Кліків: ${count}`;
     }
-
-    // Розгорнути WebApp на весь екран
-    Telegram.WebApp.expand();
   </script>
 </body>
 </html>
+
