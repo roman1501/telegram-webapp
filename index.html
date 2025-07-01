@@ -94,6 +94,8 @@
     <div class="counter">Кліків: <span id="clicksDisplay">...</span></div>
     <div class="counter">Отримано знижок: <span id="discountsDisplay">...</span></div>
     <button class="tap-button" id="exchangeBtn">Обміняти 1000 кліків на -50% 🎫</button>
+    <button class="tap-button" id="generateCodeBtn">Отримати знижковий код 🎟️</button>
+    <div class="counter" id="generatedCodeDisplay"></div>
     <img src="bonus.jfif" alt="Promo Bonus" class="bonus-img">
   </div>
 
@@ -186,6 +188,49 @@
         alert("Недостатньо кліків. Потрібно 1000.");
       }
     });
+function generateRandomCode() {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = 'GH-';
+  for (let i = 0; i < 5; i++) {
+    code += charset[Math.floor(Math.random() * charset.length)];
+  }
+  return code;
+}
+
+document.getElementById("generateCodeBtn").addEventListener("click", async () => {
+  if (discounts <= 0) {
+    alert("У вас немає доступних знижок для генерації коду.");
+    return;
+  }
+
+  const code = generateRandomCode();
+
+  // Спроба зберегти код у Supabase
+  const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes`, {
+    method: "POST",
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      code: code,
+      used: false
+    })
+  });
+
+  if (res.ok) {
+    discounts--;
+    updateDisplay();
+    saveUserData();
+
+    document.getElementById("generatedCodeDisplay").innerText = `Ваш код: ${code}`;
+    alert("🎉 Ви отримали знижковий код!");
+  } else {
+    alert("Помилка при створенні коду. Спробуйте пізніше.");
+  }
+});
 
     function showTab(tabId, buttonEl) {
       document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
