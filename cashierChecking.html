@@ -1,4 +1,64 @@
-<script>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Касир | Знижковий код</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 40px 20px;
+      background-color: #fffefc;
+      text-align: center;
+    }
+    h1 {
+      color: #222;
+    }
+    input {
+      padding: 12px;
+      font-size: 18px;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+    #pinSection {
+      margin-bottom: 40px;
+    }
+  </style>
+</head>
+<body>
+    
+
+  <div id="pinSection">
+    <h1>🔐 Доступ касира</h1>
+    <input type="password" id="pinInput" placeholder="Введіть PIN" />
+    <br>
+    <button onclick="checkPin()">Увійти</button>
+    <div class="result" id="pinResult"></div>
+  </div>
+  <div id="appSection"  style="display: none;">
+  <h1>Списання знижки</h1>
+  <input type="text" id="codeInput" placeholder="Введіть код (GH-...)" />
+  <br>
+  <button onclick="checkCode()">Перевірити</button>
+  <div class="result" id="result"></div>
+  </div>
+ <script>
   const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // скорочено для зручності
 
@@ -91,4 +151,6 @@
     }
   }
 </script>
+</body>
+</html> 
 
