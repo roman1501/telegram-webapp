@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Касир | Знижковий код</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 40px 20px;
+      background-color: #fffefc;
+      text-align: center;
+    }
+    h1 {
+      color: #222;
+    }
+    input {
+      padding: 12px;
+      font-size: 18px;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Списання знижки</h1>
+  <input type="text" id="codeInput" placeholder="Введіть код (GH-...)" />
+  <br>
+  <button onclick="checkCode()">Перевірити</button>
+  <div class="result" id="result"></div>
+
+  <script>
+    const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Твій ключ
+
+    async function checkCode() {
+      const code = document.getElementById('codeInput').value.trim().toUpperCase();
+      const resultEl = document.getElementById('result');
+
+      if (!code) {
+        resultEl.innerText = "❗️ Введіть код.";
+        return;
+      }
+
+      // 1. Перевірка наявності коду
+      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`
+        }
+      });
+
+      const data = await res.json();
+
+      if (!data.length || data[0].used) {
+        resultEl.innerText = "❌ Код не знайдено або вже використано.";
+        return;
+      }
+
+      // 2. Списання знижки
+      const patch = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
+        method: "PATCH",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ used: true })
+      });
+
+      if (patch.ok) {
+        resultEl.innerText = "✅ Знижку застосовано!";
+      } else {
+        resultEl.innerText = "⚠️ Сталася помилка при списанні коду.";
+      }
+    }
+  </script>
+</body>
+</html>
