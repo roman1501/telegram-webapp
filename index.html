@@ -125,6 +125,42 @@
     .bonus-card.used {
       opacity: 0.6;
     }
+
+    #confirmModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+    #confirmModal .modal-box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 90%;
+      text-align: center;
+    }
+    #confirmModal p {
+      font-size: 18px;
+    }
+    #confirmModal button {
+      padding: 10px 20px;
+      margin: 10px 5px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #confirmActivate {
+      background: #4CAF50;
+      color: white;
+    }
+    #cancelActivate {
+      background: #ccc;
+    }
   </style>
 </head>
 <body>
@@ -172,6 +208,14 @@
     <button class="tab-button" onclick="showTab('inventory-tab', this)">Інвентар</button>
   </div>
 
+  <!-- Модальне вікно -->
+  <div id="confirmModal">
+    <div class="modal-box">
+      <p>Після активації цього бонусу зʼявиться код. Цей код потрібно буде заскрінити або відразу показати на касі. Інакше, ви втратите цей код назавжди.</p>
+      <button id="confirmActivate">Активувати</button>
+      <button id="cancelActivate">Назад</button>
+    </div>
+  </div>
 
 <script>
   const tg = window.Telegram.WebApp;
@@ -180,18 +224,17 @@
   const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
 
-  let user = tg.initDataUnsafe?.user;
-  if (!user) {
-    user = { id: 123456789, first_name: "Тест" };
-    console.warn("⚠️ Запущено не через Telegram — використовується тестовий користувач");
-  }
-
+  let user = tg.initDataUnsafe?.user || { id: 123456789, first_name: "Тест" };
   const userId = user.id;
   const userName = user.first_name || "Гість";
   document.getElementById("username").innerText = userName;
 
   const counterEl = document.getElementById("counter");
   const inventoryListEl = document.querySelector("#inventory-tab .bonus-list");
+
+  const confirmModal = document.getElementById("confirmModal");
+  const confirmBtn = document.getElementById("confirmActivate");
+  const cancelBtn = document.getElementById("cancelActivate");
 
   const availableBonuses = [
     {
@@ -214,22 +257,14 @@
 
   async function fetchUserData() {
     const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`
-      }
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
     });
     const data = await res.json();
-    if (data.length > 0) {
-      clicks = data[0].clicks;
-    } else {
+    if (data.length > 0) clicks = data[0].clicks;
+    else {
       await fetch(`${supabaseUrl}/rest/v1/clicks`, {
         method: "POST",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
-        },
+        headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: userId, clicks: 0 })
       });
     }
@@ -243,11 +278,7 @@
   async function saveUserData() {
     await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
       method: "PATCH",
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        "Content-Type": "application/json"
-      },
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({ clicks })
     });
   }
@@ -255,24 +286,18 @@
   function generateRandomCode() {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = 'GH-';
-    for (let i = 0; i < 5; i++) {
-      code += charset[Math.floor(Math.random() * charset.length)];
-    }
+    for (let i = 0; i < 5; i++) code += charset[Math.floor(Math.random() * charset.length)];
     return code;
   }
 
   async function loadInventory() {
     const res = await fetch(`${supabaseUrl}/rest/v1/bonuses?user_id=eq.${userId}`, {
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`
-      }
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
     });
     const bonuses = await res.json();
     inventoryListEl.innerHTML = "";
-
     bonuses.sort((a, b) => a.used - b.used);
-    
+
     for (const bonus of bonuses) {
       const bonusData = availableBonuses.find(b => b.name === bonus.name);
       if (!bonusData) continue;
@@ -291,39 +316,41 @@
 
       if (!bonus.used) {
         const btn = card.querySelector("button");
-        btn.addEventListener("click", async () => {
-          const code = generateRandomCode();
+        btn.addEventListener("click", () => {
+          confirmModal.style.display = "flex";
 
-          const codeRes = await fetch(`${supabaseUrl}/rest/v1/discount_codes`, {
-            method: "POST",
-            headers: {
-              apikey: supabaseKey,
-              Authorization: `Bearer ${supabaseKey}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              user_id: userId,
-              code: code,
-              used: false
-            })
-          });
+          const closeModal = () => {
+            confirmModal.style.display = "none";
+            confirmBtn.onclick = null;
+            cancelBtn.onclick = null;
+          };
 
-          const updateRes = await fetch(`${supabaseUrl}/rest/v1/bonuses?id=eq.${bonus.id}`, {
-            method: "PATCH",
-            headers: {
-              apikey: supabaseKey,
-              Authorization: `Bearer ${supabaseKey}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ used: true })
-          });
+          cancelBtn.onclick = closeModal;
 
-          if (codeRes.ok && updateRes.ok) {
-            alert(`🎉 Ваш код: ${code}`);
-            loadInventory();
-          } else {
-            alert("Помилка при активації бонусу.");
-          }
+          confirmBtn.onclick = async () => {
+            const code = generateRandomCode();
+
+            const codeRes = await fetch(`${supabaseUrl}/rest/v1/discount_codes`, {
+              method: "POST",
+              headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ user_id: userId, code, used: false })
+            });
+
+            const updateRes = await fetch(`${supabaseUrl}/rest/v1/bonuses?id=eq.${bonus.id}`, {
+              method: "PATCH",
+              headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ used: true })
+            });
+
+            closeModal();
+
+            if (codeRes.ok && updateRes.ok) {
+              alert(`🎉 Ваш код: ${code}`);
+              loadInventory();
+            } else {
+              alert("Помилка при активації бонусу.");
+            }
+          };
         });
       }
 
@@ -333,7 +360,6 @@
 
   function setupMarketButtons() {
     const marketCards = document.querySelectorAll("#market-tab .bonus-card");
-
     marketCards.forEach((card, index) => {
       const btn = card.querySelector("button");
       btn.addEventListener("click", async () => {
@@ -349,17 +375,8 @@
 
         const res = await fetch(`${supabaseUrl}/rest/v1/bonuses`, {
           method: "POST",
-          headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            name: bonus.name,
-            price: bonus.price,
-            used: false
-          })
+          headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId, name: bonus.name, price: bonus.price, used: false })
         });
 
         if (res.ok) {
@@ -383,10 +400,7 @@
     document.getElementById(tabId).classList.add("active");
     document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
     buttonEl.classList.add("active");
-
-    if (tabId === "inventory-tab") {
-      loadInventory();
-    }
+    if (tabId === "inventory-tab") loadInventory();
   }
 
   fetchUserData().then(() => {
@@ -394,9 +408,6 @@
     loadInventory();
   });
 </script>
-
-
-
 
 </body>
 </html>
