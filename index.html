@@ -271,6 +271,8 @@
     const bonuses = await res.json();
     inventoryListEl.innerHTML = "";
 
+    bonuses.sort((a, b) => a.used - b.used);
+    
     for (const bonus of bonuses) {
       const bonusData = availableBonuses.find(b => b.name === bonus.name);
       if (!bonusData) continue;
