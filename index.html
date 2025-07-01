@@ -129,10 +129,10 @@
     const discountsDisplay = document.getElementById("discountsDisplay");
 
     async function fetchUserData() {
-      const res = await fetch(${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}, {
+      const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
         headers: {
           apikey: supabaseKey,
-          Authorization: Bearer ${supabaseKey}
+          Authorization: `Bearer ${supabaseKey}`
         }
       });
       const data = await res.json();
@@ -140,11 +140,11 @@
         clicks = data[0].clicks;
         discounts = data[0].discounts;
       } else {
-        await fetch(${supabaseUrl}/rest/v1/clicks, {
+        await fetch(`${supabaseUrl}/rest/v1/clicks`, {
           method: "POST",
           headers: {
             apikey: supabaseKey,
-            Authorization: Bearer ${supabaseKey},
+            Authorization: `Bearer ${supabaseKey}`,
             "Content-Type": "application/json"
           },
           body: JSON.stringify({ user_id: userId, clicks: 0, discounts: 0 })
@@ -154,17 +154,17 @@
     }
 
     function updateDisplay() {
-      counterEl.innerText = Кліків: ${clicks};
+      counterEl.innerText = `Кліків: ${clicks}`;
       clicksDisplay.innerText = clicks;
       discountsDisplay.innerText = discounts;
     }
 
     async function saveUserData() {
-      await fetch(${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}, {
+      await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
         method: "PATCH",
         headers: {
           apikey: supabaseKey,
-          Authorization: Bearer ${supabaseKey},
+          Authorization: `Bearer ${supabaseKey}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ clicks, discounts })
@@ -188,49 +188,48 @@
         alert("Недостатньо кліків. Потрібно 1000.");
       }
     });
-function generateRandomCode() {
-  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = 'GH-';
-  for (let i = 0; i < 5; i++) {
-    code += charset[Math.floor(Math.random() * charset.length)];
-  }
-  return code;
-}
 
-document.getElementById("generateCodeBtn").addEventListener("click", async () => {
-  if (discounts <= 0) {
-    alert("У вас немає доступних знижок для генерації коду.");
-    return;
-  }
+    function generateRandomCode() {
+      const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = 'GH-';
+      for (let i = 0; i < 5; i++) {
+        code += charset[Math.floor(Math.random() * charset.length)];
+      }
+      return code;
+    }
 
-  const code = generateRandomCode();
+    document.getElementById("generateCodeBtn").addEventListener("click", async () => {
+      if (discounts <= 0) {
+        alert("У вас немає доступних знижок для генерації коду.");
+        return;
+      }
 
-  // Спроба зберегти код у Supabase
-  const res = await fetch(${supabaseUrl}/rest/v1/discount_codes, {
-    method: "POST",
-    headers: {
-      apikey: supabaseKey,
-      Authorization: Bearer ${supabaseKey},
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      user_id: userId,
-      code: code,
-      used: false
-    })
-  });
+      const code = generateRandomCode();
 
-  if (res.ok) {
-    discounts--;
-    updateDisplay();
-    saveUserData();
+      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          code: code,
+          used: false
+        })
+      });
 
-    document.getElementById("generatedCodeDisplay").innerText = Ваш код: ${code};
-    alert("🎉 Ви отримали знижковий код!");
-  } else {
-    alert("Помилка при створенні коду. Спробуйте пізніше.");
-  }
-});
+      if (res.ok) {
+        discounts--;
+        updateDisplay();
+        saveUserData();
+        document.getElementById("generatedCodeDisplay").innerText = `Ваш код: ${code}`;
+        alert("🎉 Ви отримали знижковий код!");
+      } else {
+        alert("Помилка при створенні коду. Спробуйте пізніше.");
+      }
+    });
 
     function showTab(tabId, buttonEl) {
       document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
