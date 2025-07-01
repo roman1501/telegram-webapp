@@ -129,7 +129,7 @@
 </head>
 <body>
 
-  <!-- Вкладка Тапати -->
+  <!-- Тапати -->
   <div id="tap-tab" class="tab-content active">
     <img src="logo.jfif" alt="Greek House logo" class="logo">
     <h2>Привіт, <span id="username">...</span>!</h2>
@@ -138,18 +138,7 @@
     <img src="gyros.jpeg" alt="Gyros" class="gyros-img">
   </div>
 
-  <!-- Вкладка Обмін -->
-  <div id="exchange-tab" class="tab-content">
-    <h2>🎁 Обмін знижок</h2>
-    <div class="counter">Кліків: <span id="clicksDisplay">...</span></div>
-    <div class="counter">Отримано знижок: <span id="discountsDisplay">...</span></div>
-    <button class="tap-button" id="exchangeBtn">Обміняти 1000 кліків на -50% 🎫</button>
-    <button class="tap-button" id="generateCodeBtn">Отримати знижковий код 🎟️</button>
-    <div class="counter" id="generatedCodeDisplay"></div>
-    <img src="bonus.jfif" alt="Promo Bonus" class="bonus-img">
-  </div>
-
-  <!-- Вкладка Ринок -->
+  <!-- Ринок -->
   <div id="market-tab" class="tab-content">
     <h2>🛒 Ринок бонусів</h2>
     <div class="bonus-list">
@@ -170,7 +159,7 @@
     </div>
   </div>
 
-  <!-- Вкладка Інвентар -->
+  <!-- Інвентар -->
   <div id="inventory-tab" class="tab-content">
     <h2>🎒 Інвентар</h2>
     <div class="bonus-list"></div>
@@ -179,13 +168,11 @@
   <!-- Панель вкладок -->
   <div class="tab-bar">
     <button class="tab-button active" onclick="showTab('tap-tab', this)">Тапати</button>
-    <button class="tab-button" onclick="showTab('exchange-tab', this)">Обмін</button>
     <button class="tab-button" onclick="showTab('market-tab', this)">Ринок</button>
     <button class="tab-button" onclick="showTab('inventory-tab', this)">Інвентар</button>
   </div>
 
-  
- 
+
 <script>
   const tg = window.Telegram.WebApp;
   tg.expand();
@@ -193,23 +180,17 @@
   const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
 
-let user = tg.initDataUnsafe?.user;
-
-if (!user) {
-  // fallback для тестування в браузері
-  user = { id: 123456789, first_name: "Тест" };
-  console.warn("⚠️ Запущено не через Telegram — використовується тестовий користувач");
-}
-
+  let user = tg.initDataUnsafe?.user;
+  if (!user) {
+    user = { id: 123456789, first_name: "Тест" };
+    console.warn("⚠️ Запущено не через Telegram — використовується тестовий користувач");
+  }
 
   const userId = user.id;
   const userName = user.first_name || "Гість";
   document.getElementById("username").innerText = userName;
 
   const counterEl = document.getElementById("counter");
-  const clicksDisplay = document.getElementById("clicksDisplay");
-  const discountsDisplay = document.getElementById("discountsDisplay");
-
   const inventoryListEl = document.querySelector("#inventory-tab .bonus-list");
 
   const availableBonuses = [
@@ -230,7 +211,6 @@ if (!user) {
   ];
 
   let clicks = 0;
-  let discounts = 0;
 
   async function fetchUserData() {
     const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
@@ -242,7 +222,6 @@ if (!user) {
     const data = await res.json();
     if (data.length > 0) {
       clicks = data[0].clicks;
-      discounts = data[0].discounts;
     } else {
       await fetch(`${supabaseUrl}/rest/v1/clicks`, {
         method: "POST",
@@ -251,7 +230,7 @@ if (!user) {
           Authorization: `Bearer ${supabaseKey}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ user_id: userId, clicks: 0, discounts: 0 })
+        body: JSON.stringify({ user_id: userId, clicks: 0 })
       });
     }
     updateDisplay();
@@ -259,8 +238,6 @@ if (!user) {
 
   function updateDisplay() {
     counterEl.innerText = `Кліків: ${clicks}`;
-    clicksDisplay.innerText = clicks;
-    discountsDisplay.innerText = discounts;
   }
 
   async function saveUserData() {
@@ -271,7 +248,7 @@ if (!user) {
         Authorization: `Bearer ${supabaseKey}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ clicks, discounts })
+      body: JSON.stringify({ clicks })
     });
   }
 
@@ -399,51 +376,6 @@ if (!user) {
     saveUserData();
   });
 
-  document.getElementById("exchangeBtn").addEventListener("click", () => {
-    if (clicks >= 1000) {
-      clicks -= 1000;
-      discounts++;
-      updateDisplay();
-      saveUserData();
-      alert("🎉 Вітаємо! Ви отримали знижку 50% на гірос у Greek House.");
-    } else {
-      alert("Недостатньо кліків. Потрібно 1000.");
-    }
-  });
-
-  document.getElementById("generateCodeBtn").addEventListener("click", async () => {
-    if (discounts <= 0) {
-      alert("У вас немає доступних знижок для генерації коду.");
-      return;
-    }
-
-    const code = generateRandomCode();
-
-    const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes`, {
-      method: "POST",
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        user_id: userId,
-        code: code,
-        used: false
-      })
-    });
-
-    if (res.ok) {
-      discounts--;
-      updateDisplay();
-      saveUserData();
-      document.getElementById("generatedCodeDisplay").innerText = `Ваш код: ${code}`;
-      alert("🎉 Ви отримали знижковий код!");
-    } else {
-      alert("Помилка при створенні коду. Спробуйте пізніше.");
-    }
-  });
-
   function showTab(tabId, buttonEl) {
     document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
     document.getElementById(tabId).classList.add("active");
@@ -460,6 +392,7 @@ if (!user) {
     loadInventory();
   });
 </script>
+
 
 
 
