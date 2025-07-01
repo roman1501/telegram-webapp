@@ -88,34 +88,34 @@
   }
 
   async function checkCode() {
-    const code = document.getElementById('codeInput').value.trim().toUpperCase();
-    const resultEl = document.getElementById('result');
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  const resultEl = document.getElementById('result');
 
-    if (!code.startsWith("GH-")) {
-      resultEl.innerText = "❗️ Код має починатись з GH-";
-      return;
+  if (!code.startsWith("GH-")) {
+    resultEl.innerText = "❗️ Код має починатись з GH-";
+    return;
+  }
+
+  // ✅ FIX: encodeURIComponent
+  const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${encodeURIComponent(code)}&select=*`, {
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`
     }
+  });
 
-    // 1. Перевірка коду
-    const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}&select=*`, {
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`
-      }
-    });
+  const data = await res.json();
 
-    const data = await res.json();
+  if (!data.length) {
+    resultEl.innerText = "❌ Код не знайдено.";
+    return;
+  }
 
-    if (!data.length) {
-      resultEl.innerText = "❌ Код не знайдено.";
-      return;
-    }
-
-    const promo = data[0];
-    if (promo.used) {
-      resultEl.innerText = "❌ Код вже використано.";
-      return;
-    }
+  const promo = data[0];
+  if (promo.used) {
+    resultEl.innerText = "❌ Код вже використано.";
+    return;
+  }
 
     // 2. Шукаємо назву бонусу (тип) за user_id
     const bonusRes = await fetch(`${supabaseUrl}/rest/v1/bonuses?user_id=eq.${promo.user_id}&used=eq.true&order=created_at.desc&limit=1`, {
