@@ -6,6 +6,18 @@
   <title>Greek House Tapper</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
+    :root {
+      --main-green: #004d00;
+      --accent-green: #43a047;
+      --light-green: #66bb6a;
+      --dark-green: #2e7d32;
+      --card-bg: #f5f5f5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
@@ -13,24 +25,41 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: linear-gradient(to bottom, #004d00, #ffffff);
+      background: linear-gradient(to bottom, var(--main-green), #ffffff);
+      animation: fadeIn 1s ease-in;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
     .tab-content {
       flex: 1;
       padding: 20px;
       display: none;
       text-align: center;
       overflow-y: auto;
+      animation: slideIn 0.3s ease;
     }
+
     .tab-content.active {
       display: block;
     }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
     .tab-bar {
       display: flex;
       height: 60px;
-      background: #004d00;
-      border-top: 2px solid #2e7d32;
+      background: var(--main-green);
+      border-top: 2px solid var(--dark-green);
+      box-shadow: 0 -3px 10px rgba(0,0,0,0.2);
     }
+
     .tab-button {
       flex: 1;
       font-size: 18px;
@@ -40,90 +69,130 @@
       background: none;
       color: white;
       font-weight: bold;
+      transition: background 0.3s;
     }
+
+    .tab-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
     .tab-button.active {
-      background: #66bb6a;
+      background: var(--light-green);
       color: #fff;
     }
+
     .tap-button {
       font-size: 28px;
       padding: 20px 40px;
       margin-top: 30px;
-      background-color: #43a047;
+      background-color: var(--accent-green);
       color: white;
       border: none;
       border-radius: 12px;
       cursor: pointer;
       user-select: none;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: transform 0.1s, background-color 0.3s;
     }
+
     .tap-button:active {
-      background-color: #2e7d32;
+      background-color: var(--dark-green);
       transform: scale(0.97);
     }
+
     .counter {
       margin-top: 20px;
       font-size: 24px;
       color: #333;
+      animation: pulse 1s infinite alternate ease-in-out;
     }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+
     .logo {
       width: 100px;
       margin: 10px auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
+
     .gyros-img, .bonus-img {
       max-width: 100%;
       margin-top: 20px;
-      border-radius: 8px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
+
     .bonus-list {
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
+
     .bonus-card {
-      background: #f5f5f5;
-      border-radius: 12px;
+      background: var(--card-bg);
+      border-radius: 16px;
       padding: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
       text-align: left;
+      transition: transform 0.2s;
     }
+
+    .bonus-card:hover {
+      transform: scale(1.02);
+    }
+
     .bonus-card img {
       width: 100%;
-      border-radius: 8px;
+      border-radius: 12px;
       margin-bottom: 12px;
     }
+
     .bonus-title {
       font-size: 20px;
       font-weight: bold;
-      color: #2e7d32;
+      color: var(--dark-green);
       margin-bottom: 8px;
     }
+
     .bonus-description {
       font-size: 16px;
       margin-bottom: 12px;
       color: #333;
     }
+
     .bonus-price {
       font-size: 18px;
       color: #000;
       font-weight: bold;
       margin-bottom: 10px;
     }
+
     .bonus-card button {
       padding: 12px 20px;
-      background-color: #43a047;
+      background-color: var(--accent-green);
       color: #fff;
       border: none;
       border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
     }
+
+    .bonus-card button:hover {
+      background-color: var(--light-green);
+    }
+
     .bonus-card button:active {
-      background-color: #2e7d32;
+      transform: scale(0.96);
     }
+
     .bonus-card.used {
       opacity: 0.6;
+      filter: grayscale(60%);
     }
 
     #confirmModal {
@@ -135,31 +204,41 @@
       z-index: 999;
       justify-content: center;
       align-items: center;
+      animation: fadeIn 0.3s ease;
     }
+
     #confirmModal .modal-box {
       background: white;
-      padding: 20px;
-      border-radius: 12px;
+      padding: 24px;
+      border-radius: 16px;
       max-width: 90%;
       text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+      animation: slideIn 0.4s ease;
     }
+
     #confirmModal p {
       font-size: 18px;
+      color: #333;
     }
+
     #confirmModal button {
-      padding: 10px 20px;
-      margin: 10px 5px 0;
+      padding: 12px 24px;
+      margin: 10px 8px 0;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 16px;
       cursor: pointer;
     }
+
     #confirmActivate {
-      background: #4CAF50;
+      background: var(--accent-green);
       color: white;
     }
+
     #cancelActivate {
       background: #ccc;
+      color: #333;
     }
   </style>
 </head>
