@@ -14,6 +14,8 @@
       flex-direction: column;
       height: 100vh;
       background: linear-gradient(to bottom, #004d00, #ffffff);
+      background-size: cover;
+      background-position: center;
     }
     .tab-content {
       flex: 1;
@@ -43,6 +45,7 @@
     }
     .tab-button.active {
       background: #66bb6a;
+      color: #fff;
     }
     .tap-button {
       font-size: 28px;
@@ -87,7 +90,7 @@
   </div>
 
   <div id="exchange-tab" class="tab-content">
-    <h2>🏱 Обмін знижок</h2>
+    <h2>🎁 Обмін знижок</h2>
     <div class="counter">Кліків: <span id="clicksDisplay">...</span></div>
     <div class="counter">Отримано знижок: <span id="discountsDisplay">...</span></div>
     <button class="tap-button" id="exchangeBtn">Обміняти 1000 кліків на -50% 🎫</button>
@@ -106,7 +109,7 @@
     tg.expand();
 
     const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
-    const supabaseKey = 'your_anon_key_here';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
 
     const user = tg.initDataUnsafe?.user;
     if (!user) {
@@ -126,11 +129,10 @@
     const discountsDisplay = document.getElementById("discountsDisplay");
 
     async function fetchUserData() {
-      const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
+      const res = await fetch(${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}, {
         headers: {
           apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          'user-id': userId.toString()
+          Authorization: Bearer ${supabaseKey}
         }
       });
       const data = await res.json();
@@ -138,13 +140,12 @@
         clicks = data[0].clicks;
         discounts = data[0].discounts;
       } else {
-        await fetch(`${supabaseUrl}/rest/v1/clicks`, {
+        await fetch(${supabaseUrl}/rest/v1/clicks, {
           method: "POST",
           headers: {
             apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            "Content-Type": "application/json",
-            'user-id': userId.toString()
+            Authorization: Bearer ${supabaseKey},
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({ user_id: userId, clicks: 0, discounts: 0 })
         });
@@ -153,19 +154,18 @@
     }
 
     function updateDisplay() {
-      counterEl.innerText = `Кліків: ${clicks}`;
+      counterEl.innerText = Кліків: ${clicks};
       clicksDisplay.innerText = clicks;
       discountsDisplay.innerText = discounts;
     }
 
     async function saveUserData() {
-      await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
+      await fetch(${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}, {
         method: "PATCH",
         headers: {
           apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json",
-          'user-id': userId.toString()
+          Authorization: Bearer ${supabaseKey},
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ clicks, discounts })
       });
@@ -188,48 +188,49 @@
         alert("Недостатньо кліків. Потрібно 1000.");
       }
     });
+function generateRandomCode() {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = 'GH-';
+  for (let i = 0; i < 5; i++) {
+    code += charset[Math.floor(Math.random() * charset.length)];
+  }
+  return code;
+}
 
-    function generateRandomCode() {
-      const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = 'GH-';
-      for (let i = 0; i < 5; i++) {
-        code += charset[Math.floor(Math.random() * charset.length)];
-      }
-      return code;
-    }
+document.getElementById("generateCodeBtn").addEventListener("click", async () => {
+  if (discounts <= 0) {
+    alert("У вас немає доступних знижок для генерації коду.");
+    return;
+  }
 
-    document.getElementById("generateCodeBtn").addEventListener("click", async () => {
-      if (discounts <= 0) {
-        alert("У вас немає доступних знижок для генерації коду.");
-        return;
-      }
+  const code = generateRandomCode();
 
-      const code = generateRandomCode();
-      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes`, {
-        method: "POST",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json",
-          'user-id': userId.toString()
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          code: code,
-          used: false
-        })
-      });
+  // Спроба зберегти код у Supabase
+  const res = await fetch(${supabaseUrl}/rest/v1/discount_codes, {
+    method: "POST",
+    headers: {
+      apikey: supabaseKey,
+      Authorization: Bearer ${supabaseKey},
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      code: code,
+      used: false
+    })
+  });
 
-      if (res.ok) {
-        discounts--;
-        updateDisplay();
-        saveUserData();
-        document.getElementById("generatedCodeDisplay").innerText = `Ваш код: ${code}`;
-        alert("🎉 Ви отримали знижковий код!");
-      } else {
-        alert("Помилка при створенні коду. Спробуйте пізніше.");
-      }
-    });
+  if (res.ok) {
+    discounts--;
+    updateDisplay();
+    saveUserData();
+
+    document.getElementById("generatedCodeDisplay").innerText = Ваш код: ${code};
+    alert("🎉 Ви отримали знижковий код!");
+  } else {
+    alert("Помилка при створенні коду. Спробуйте пізніше.");
+  }
+});
 
     function showTab(tabId, buttonEl) {
       document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
@@ -237,6 +238,11 @@
       document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
       buttonEl.classList.add("active");
     }
+
+    fetchUserData();
+  </script>
+</body>
+</html>
 
     fetchUserData();
   </script>
