@@ -1,129 +1,94 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Касир | Знижковий код</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 40px 20px;
-      background-color: #fffefc;
-      text-align: center;
-    }
-    h1 {
-      color: #222;
-    }
-    input {
-      padding: 12px;
-      font-size: 18px;
-      width: 80%;
-      max-width: 300px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 20px;
-    }
-    button {
-      padding: 12px 20px;
-      font-size: 18px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 20px;
-      font-size: 20px;
-    }
-    #pinSection {
-      margin-bottom: 40px;
-    }
-  </style>
-</head>
-<body>
-    
+<script>
+  const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // скорочено для зручності
 
-  <div id="pinSection">
-    <h1>🔐 Доступ касира</h1>
-    <input type="password" id="pinInput" placeholder="Введіть PIN" />
-    <br>
-    <button onclick="checkPin()">Увійти</button>
-    <div class="result" id="pinResult"></div>
-  </div>
-  <div id="appSection"  style="display: none;">
-  <h1>Списання знижки</h1>
-  <input type="text" id="codeInput" placeholder="Введіть код (GH-...)" />
-  <br>
-  <button onclick="checkCode()">Перевірити</button>
-  <div class="result" id="result"></div>
-  </div>
-  <script>
-    const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
+  const CORRECT_PIN = '9548';
 
- const CORRECT_PIN = '9548';
+  const availableBonuses = [
+    {
+      name: "gyros",
+      title: "-50% на гірос",
+    },
+    {
+      name: "potato",
+      title: "Велика картопля за 35 грн",
+    }
+  ];
 
-    function checkPin() {
-      const pin = document.getElementById('pinInput').value.trim();
-      const pinResult = document.getElementById('pinResult');
+  function checkPin() {
+    const pin = document.getElementById('pinInput').value.trim();
+    const pinResult = document.getElementById('pinResult');
 
-      if (pin === CORRECT_PIN) {
-        document.getElementById('pinSection').style.display = 'none';
-        document.getElementById('appSection').style.display = 'block';
-      } else {
-        pinResult.innerText = "❌ Невірний PIN-код.";
+    if (pin === CORRECT_PIN) {
+      document.getElementById('pinSection').style.display = 'none';
+      document.getElementById('appSection').style.display = 'block';
+    } else {
+      pinResult.innerText = "❌ Невірний PIN-код.";
+    }
+  }
+
+  async function checkCode() {
+    const code = document.getElementById('codeInput').value.trim().toUpperCase();
+    const resultEl = document.getElementById('result');
+
+    if (!code.startsWith("GH-")) {
+      resultEl.innerText = "❗️ Код має починатись з GH-";
+      return;
+    }
+
+    // 1. Перевірка коду
+    const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}&select=*`, {
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`
       }
+    });
+
+    const data = await res.json();
+
+    if (!data.length) {
+      resultEl.innerText = "❌ Код не знайдено.";
+      return;
     }
 
-    
-    async function checkCode() {
-      const code = document.getElementById('codeInput').value.trim().toUpperCase();
-      const resultEl = document.getElementById('result');
-
-      if (!code.startsWith("GH-")) {
-        resultEl.innerText = "❗️ Код має починатись з GH-";
-        return;
-      }
-
-      // 1. Перевірка чи є такий код і чи не використаний
-      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}&select=*`, {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`
-        }
-      });
-
-      const data = await res.json();
-
-      if (!data.length) {
-        resultEl.innerText = "❌ Код не знайдено.";
-        return;
-      }
-
-      if (data[0].used) {
-        resultEl.innerText = "❌ Код вже використано.";
-        return;
-      }
-
-      // 2. Позначаємо як використаний
-      const update = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
-        method: "PATCH",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ used: true })
-      });
-
-      if (update.ok) {
-        resultEl.innerText = "✅ Знижку успішно застосовано!";
-      } else {
-        resultEl.innerText = "⚠️ Помилка при оновленні. Спробуйте ще раз.";
-      }
+    const promo = data[0];
+    if (promo.used) {
+      resultEl.innerText = "❌ Код вже використано.";
+      return;
     }
-  </script>
-</body>
-</html>
+
+    // 2. Шукаємо назву бонусу (тип) за user_id
+    const bonusRes = await fetch(`${supabaseUrl}/rest/v1/bonuses?user_id=eq.${promo.user_id}&used=eq.true&order=created_at.desc&limit=1`, {
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`
+      }
+    });
+
+    const bonusData = await bonusRes.json();
+    let bonusTitle = "Обраний бонус";
+
+    if (bonusData.length > 0) {
+      const bonus = availableBonuses.find(b => b.name === bonusData[0].name);
+      bonusTitle = bonus?.title || bonusTitle;
+    }
+
+    // 3. Списуємо
+    const update = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
+      method: "PATCH",
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ used: true })
+    });
+
+    if (update.ok) {
+      resultEl.innerText = `✅ Знижку застосовано: ${bonusTitle}!`;
+    } else {
+      resultEl.innerText = "⚠️ Помилка при оновленні. Спробуйте ще раз.";
+    }
+  }
+</script>
 
