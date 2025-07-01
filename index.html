@@ -2,26 +2,22 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Greek House Tapper</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #004d00, #ffffff);
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: linear-gradient(to bottom, #004d00, #ffffff);
-      background-size: cover;
-      background-position: center;
     }
     .tab-content {
       flex: 1;
       padding: 20px;
       display: none;
-      text-align: center;
       overflow-y: auto;
     }
     .tab-content.active {
@@ -31,77 +27,88 @@
       display: flex;
       height: 60px;
       background: #004d00;
-      border-top: 2px solid #2e7d32;
     }
     .tab-button {
       flex: 1;
-      font-size: 18px;
-      padding: 10px;
-      cursor: pointer;
       border: none;
       background: none;
       color: white;
+      font-size: 18px;
       font-weight: bold;
+      cursor: pointer;
     }
     .tab-button.active {
       background: #66bb6a;
-      color: #fff;
     }
     .tap-button {
-      font-size: 28px;
-      padding: 20px 40px;
-      margin-top: 30px;
+      font-size: 20px;
+      padding: 15px 30px;
       background-color: #43a047;
       color: white;
       border: none;
       border-radius: 12px;
+      margin-top: 20px;
       cursor: pointer;
-      user-select: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
     .tap-button:active {
       background-color: #2e7d32;
-      transform: scale(0.97);
     }
     .counter {
       margin-top: 20px;
-      font-size: 24px;
-      color: #333;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    .bonus-item {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+    .inventory-item {
+      background: #fffde7;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px 0;
     }
     .logo {
       width: 100px;
+      display: block;
       margin: 10px auto;
-    }
-    .gyros-img, .bonus-img {
-      max-width: 100%;
-      margin-top: 20px;
-      border-radius: 8px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
 <body>
   <div id="tap-tab" class="tab-content active">
-    <img src="logo.jfif" alt="Greek House logo" class="logo">
+    <img src="logo.jfif" alt="logo" class="logo">
     <h2>Привіт, <span id="username">...</span>!</h2>
-    <button class="tap-button" id="tapBtn">ТАПАЙ ГІРОС 🍗</button>
-    <div class="counter" id="counter">Завантаження...</div>
-    <img src="gyros.jpeg" alt="Gyros" class="gyros-img">
+    <button class="tap-button" id="tapBtn">ТАПАТИ 🍗</button>
+    <div class="counter">Кліків: <span id="clicksCount">...</span></div>
   </div>
 
-  <div id="exchange-tab" class="tab-content">
-    <h2>🎁 Обмін знижок</h2>
-    <div class="counter">Кліків: <span id="clicksDisplay">...</span></div>
-    <div class="counter">Отримано знижок: <span id="discountsDisplay">...</span></div>
-    <button class="tap-button" id="exchangeBtn">Обміняти 1000 кліків на -50% 🎫</button>
-    <button class="tap-button" id="generateCodeBtn">Отримати знижковий код 🎟️</button>
-    <div class="counter" id="generatedCodeDisplay"></div>
-    <img src="bonus.jfif" alt="Promo Bonus" class="bonus-img">
+  <div id="market-tab" class="tab-content">
+    <h2>🏪 Ринок</h2>
+    <div class="counter">Ваші кліки: <span id="marketClicks">...</span></div>
+    <div class="bonus-item">
+      <h3>Знижка -50% на гірос</h3>
+      <p>Ціна: 1000 кліків</p>
+      <button class="tap-button" onclick="buyBonus('Знижка -50% на гірос', 1000)">Купити</button>
+    </div>
+    <div class="bonus-item">
+      <h3>Велика картопля за 35 грн</h3>
+      <p>Ціна: 700 кліків</p>
+      <button class="tap-button" onclick="buyBonus('Картопля 35 грн', 700)">Купити</button>
+    </div>
+  </div>
+
+  <div id="inventory-tab" class="tab-content">
+    <h2>🎒 Інвентар</h2>
+    <div id="inventoryList">Завантаження...</div>
   </div>
 
   <div class="tab-bar">
     <button class="tab-button active" onclick="showTab('tap-tab', this)">Тапати</button>
-    <button class="tab-button" onclick="showTab('exchange-tab', this)">Обмін</button>
+    <button class="tab-button" onclick="showTab('market-tab', this)">Ринок</button>
+    <button class="tab-button" onclick="showTab('inventory-tab', this)">Інвентар</button>
   </div>
 
   <script>
@@ -109,136 +116,132 @@
     tg.expand();
 
     const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
+    const supabaseKey = 'YOUR_SUPABASE_KEY';
+    const headers = {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json'
+    };
 
     const user = tg.initDataUnsafe?.user;
     if (!user) {
-      alert("Цей застосунок потрібно відкривати через Telegram.");
-      throw new Error("user not found");
+      alert('Цей застосунок потрібно відкрити через Telegram');
+      throw new Error('User not found');
     }
 
     const userId = user.id;
-    const userName = user.first_name || "Гість";
-    document.getElementById("username").innerText = userName;
+    document.getElementById('username').innerText = user.first_name || 'Гість';
 
     let clicks = 0;
-    let discounts = 0;
 
-    const counterEl = document.getElementById("counter");
-    const clicksDisplay = document.getElementById("clicksDisplay");
-    const discountsDisplay = document.getElementById("discountsDisplay");
-
-    async function fetchUserData() {
-      const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`
-        }
-      });
+    async function fetchClicks() {
+      const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, { headers });
       const data = await res.json();
-      if (data.length > 0) {
+      if (data.length) {
         clicks = data[0].clicks;
-        discounts = data[0].discounts;
       } else {
         await fetch(`${supabaseUrl}/rest/v1/clicks`, {
-          method: "POST",
-          headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            "Content-Type": "application/json"
-          },
+          method: 'POST',
+          headers,
           body: JSON.stringify({ user_id: userId, clicks: 0, discounts: 0 })
         });
+        clicks = 0;
       }
-      updateDisplay();
+      updateCounters();
     }
 
-    function updateDisplay() {
-      counterEl.innerText = `Кліків: ${clicks}`;
-      clicksDisplay.innerText = clicks;
-      discountsDisplay.innerText = discounts;
+    function updateCounters() {
+      document.getElementById('clicksCount').innerText = clicks;
+      document.getElementById('marketClicks').innerText = clicks;
     }
 
-    async function saveUserData() {
+    async function saveClicks() {
       await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
-        method: "PATCH",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ clicks, discounts })
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ clicks })
       });
     }
 
-    document.getElementById("tapBtn").addEventListener("click", () => {
+    document.getElementById('tapBtn').addEventListener('click', async () => {
       clicks++;
-      updateDisplay();
-      saveUserData();
+      updateCounters();
+      await saveClicks();
     });
 
-    document.getElementById("exchangeBtn").addEventListener("click", () => {
-      if (clicks >= 1000) {
-        clicks -= 1000;
-        discounts++;
-        updateDisplay();
-        saveUserData();
-        alert("🎉 Вітаємо! Ви отримали знижку 50% на гірос у Greek House.");
-      } else {
-        alert("Недостатньо кліків. Потрібно 1000.");
+    async function buyBonus(name, price) {
+      if (clicks < price) return alert('Недостатньо кліків');
+      clicks -= price;
+      updateCounters();
+      await saveClicks();
+
+      await fetch(`${supabaseUrl}/rest/v1/bonuses`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ user_id: userId, name, price, used: false })
+      });
+
+      alert(`🎁 Бонус "${name}" куплено!`);
+      await renderInventory();
+    }
+
+    async function renderInventory() {
+      const res = await fetch(`${supabaseUrl}/rest/v1/bonuses?user_id=eq.${userId}&used=eq.false`, { headers });
+      const data = await res.json();
+      const list = document.getElementById('inventoryList');
+      list.innerHTML = '';
+      if (!data.length) {
+        list.innerText = 'Немає активних бонусів';
+        return;
       }
-    });
 
-    function generateRandomCode() {
-      const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      data.forEach(b => {
+        const div = document.createElement('div');
+        div.className = 'inventory-item';
+        div.innerHTML = `
+          <p>${b.name}</p>
+          <button class="tap-button" onclick="activateBonus('${b.id}', '${b.name}')">Активувати</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    async function activateBonus(bonusId, name) {
+      const code = generateCode();
+      await fetch(`${supabaseUrl}/rest/v1/discount_codes`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ user_id: userId, code, used: false })
+      });
+
+      await fetch(`${supabaseUrl}/rest/v1/bonuses?id=eq.${bonusId}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ used: true })
+      });
+
+      alert(`Ваш код: ${code}`);
+      await renderInventory();
+    }
+
+    function generateCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let code = 'GH-';
       for (let i = 0; i < 5; i++) {
-        code += charset[Math.floor(Math.random() * charset.length)];
+        code += chars[Math.floor(Math.random() * chars.length)];
       }
       return code;
     }
 
-    document.getElementById("generateCodeBtn").addEventListener("click", async () => {
-      if (discounts <= 0) {
-        alert("У вас немає доступних знижок для генерації коду.");
-        return;
-      }
-
-      const code = generateRandomCode();
-
-      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes`, {
-        method: "POST",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          code: code,
-          used: false
-        })
-      });
-
-      if (res.ok) {
-        discounts--;
-        updateDisplay();
-        saveUserData();
-        document.getElementById("generatedCodeDisplay").innerText = `Ваш код: ${code}`;
-        alert("🎉 Ви отримали знижковий код!");
-      } else {
-        alert("Помилка при створенні коду. Спробуйте пізніше.");
-      }
-    });
-
-    function showTab(tabId, buttonEl) {
-      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-      document.getElementById(tabId).classList.add("active");
-      document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-      buttonEl.classList.add("active");
+    function showTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
     }
 
-    fetchUserData();
+    fetchClicks();
+    renderInventory();
   </script>
 </body>
 </html>
