@@ -47,19 +47,20 @@
 
   <script>
     const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Твій ключ
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
 
     async function checkCode() {
-      const code = document.getElementById('codeInput').value.trim().toUpperCase();
+      const input = document.getElementById('codeInput');
       const resultEl = document.getElementById('result');
+      const code = input.value.trim().toUpperCase();
 
       if (!code) {
         resultEl.innerText = "❗️ Введіть код.";
         return;
       }
 
-      // 1. Перевірка наявності коду
-      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
+      // 1. Перевірити, чи існує код і чи не використаний
+      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq."${code}"`, {
         headers: {
           apikey: supabaseKey,
           Authorization: `Bearer ${supabaseKey}`
@@ -68,13 +69,18 @@
 
       const data = await res.json();
 
-      if (!data.length || data[0].used) {
-        resultEl.innerText = "❌ Код не знайдено або вже використано.";
+      if (!data.length) {
+        resultEl.innerText = "❌ Код не знайдено.";
         return;
       }
 
-      // 2. Списання знижки
-      const patch = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
+      if (data[0].used) {
+        resultEl.innerText = "⚠️ Цей код вже використано.";
+        return;
+      }
+
+      // 2. Списати код
+      const patch = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq."${code}"`, {
         method: "PATCH",
         headers: {
           apikey: supabaseKey,
@@ -86,8 +92,9 @@
 
       if (patch.ok) {
         resultEl.innerText = "✅ Знижку застосовано!";
+        input.value = "";
       } else {
-        resultEl.innerText = "⚠️ Сталася помилка при списанні коду.";
+        resultEl.innerText = "⚠️ Помилка при списанні знижки.";
       }
     }
   </script>
