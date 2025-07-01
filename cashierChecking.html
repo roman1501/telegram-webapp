@@ -50,17 +50,16 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
 
     async function checkCode() {
-      const input = document.getElementById('codeInput');
+      const code = document.getElementById('codeInput').value.trim().toUpperCase();
       const resultEl = document.getElementById('result');
-      const code = input.value.trim().toUpperCase();
 
-      if (!code) {
-        resultEl.innerText = "❗️ Введіть код.";
+      if (!code.startsWith("GH-")) {
+        resultEl.innerText = "❗️ Код має починатись з GH-";
         return;
       }
 
-      // 1. Перевірити, чи існує код і чи не використаний
-      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq."${code}"`, {
+      // 1. Перевірка чи є такий код і чи не використаний
+      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}&select=*`, {
         headers: {
           apikey: supabaseKey,
           Authorization: `Bearer ${supabaseKey}`
@@ -75,12 +74,12 @@
       }
 
       if (data[0].used) {
-        resultEl.innerText = "⚠️ Цей код вже використано.";
+        resultEl.innerText = "❌ Код вже використано.";
         return;
       }
 
-      // 2. Списати код
-      const patch = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq."${code}"`, {
+      // 2. Позначаємо як використаний
+      const update = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
         method: "PATCH",
         headers: {
           apikey: supabaseKey,
@@ -90,13 +89,13 @@
         body: JSON.stringify({ used: true })
       });
 
-      if (patch.ok) {
-        resultEl.innerText = "✅ Знижку застосовано!";
-        input.value = "";
+      if (update.ok) {
+        resultEl.innerText = "✅ Знижку успішно застосовано!";
       } else {
-        resultEl.innerText = "⚠️ Помилка при списанні знижки.";
+        resultEl.innerText = "⚠️ Помилка при оновленні. Спробуйте ще раз.";
       }
     }
   </script>
 </body>
 </html>
+
