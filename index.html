@@ -185,7 +185,7 @@
   </div>
 
   
-  <script>
+ 
 <script>
   const tg = window.Telegram.WebApp;
   tg.expand();
@@ -193,11 +193,14 @@
   const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
 
-  const user = tg.initDataUnsafe?.user;
-  if (!user) {
-    alert("Цей застосунок потрібно відкривати через Telegram.");
-    throw new Error("user not found");
-  }
+let user = tg.initDataUnsafe?.user;
+
+if (!user) {
+  // fallback для тестування в браузері
+  user = { id: 123456789, first_name: "Тест" };
+  console.warn("⚠️ Запущено не через Telegram — використовується тестовий користувач");
+}
+
 
   const userId = user.id;
   const userName = user.first_name || "Гість";
@@ -458,7 +461,7 @@
   });
 </script>
 
-  </script>
+
 
 </body>
 </html>
