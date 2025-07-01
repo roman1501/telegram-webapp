@@ -44,18 +44,19 @@
 <body>
     <h1>🔐 Доступ касира</h1>
 
-  <div id="pinSection" style="display: none;">
+  <div id="pinSection">
     <input type="password" id="pinInput" placeholder="Введіть PIN" />
     <br>
     <button onclick="checkPin()">Увійти</button>
     <div class="result" id="pinResult"></div>
   </div>
+  <div id="appSection"  style="display: none;">
   <h1>Списання знижки</h1>
   <input type="text" id="codeInput" placeholder="Введіть код (GH-...)" />
   <br>
   <button onclick="checkCode()">Перевірити</button>
   <div class="result" id="result"></div>
-
+  </div>
   <script>
     const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
