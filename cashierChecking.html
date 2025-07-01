@@ -42,7 +42,7 @@
   </style>
 </head>
 <body>
-  <h1>🔐 Доступ касира</h1>
+    <h1>🔐 Доступ касира</h1>
 
   <div id="pinSection">
     <input type="password" id="pinInput" placeholder="Введіть PIN" />
@@ -50,20 +50,17 @@
     <button onclick="checkPin()">Увійти</button>
     <div class="result" id="pinResult"></div>
   </div>
-
-  <div id="appSection" style="display: none;">
-    <h2>Списання знижки</h2>
-    <input type="text" id="codeInput" placeholder="Введіть код (GH-...)" />
-    <br>
-    <button onclick="checkCode()">Перевірити</button>
-    <div class="result" id="result"></div>
-  </div>
+  <h1>Списання знижки</h1>
+  <input type="text" id="codeInput" placeholder="Введіть код (GH-...)" />
+  <br>
+  <button onclick="checkCode()">Перевірити</button>
+  <div class="result" id="result"></div>
 
   <script>
     const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // ← встав сюди свій ключ
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
 
-    const CORRECT_PIN = '9548';
+ const CORRECT_PIN = '9548';
 
     function checkPin() {
       const pin = document.getElementById('pinInput').value.trim();
@@ -77,16 +74,18 @@
       }
     }
 
+    
     async function checkCode() {
       const code = document.getElementById('codeInput').value.trim().toUpperCase();
       const resultEl = document.getElementById('result');
 
-      if (!code) {
-        resultEl.innerText = "❗️ Введіть код.";
+      if (!code.startsWith("GH-")) {
+        resultEl.innerText = "❗️ Код має починатись з GH-";
         return;
       }
 
-      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
+      // 1. Перевірка чи є такий код і чи не використаний
+      const res = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}&select=*`, {
         headers: {
           apikey: supabaseKey,
           Authorization: `Bearer ${supabaseKey}`
@@ -95,12 +94,18 @@
 
       const data = await res.json();
 
-      if (!data.length || data[0].used) {
-        resultEl.innerText = "❌ Код не знайдено або вже використано.";
+      if (!data.length) {
+        resultEl.innerText = "❌ Код не знайдено.";
         return;
       }
 
-      const patch = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
+      if (data[0].used) {
+        resultEl.innerText = "❌ Код вже використано.";
+        return;
+      }
+
+      // 2. Позначаємо як використаний
+      const update = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${code}`, {
         method: "PATCH",
         headers: {
           apikey: supabaseKey,
@@ -110,10 +115,10 @@
         body: JSON.stringify({ used: true })
       });
 
-      if (patch.ok) {
-        resultEl.innerText = "✅ Знижку застосовано!";
+      if (update.ok) {
+        resultEl.innerText = "✅ Знижку успішно застосовано!";
       } else {
-        resultEl.innerText = "⚠️ Помилка при списанні коду.";
+        resultEl.innerText = "⚠️ Помилка при оновленні. Спробуйте ще раз.";
       }
     }
   </script>
