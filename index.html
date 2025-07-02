@@ -277,7 +277,7 @@
   <div id="tap-tab" class="tab-content active">
     <img src="logo.jfif" alt="Greek House logo" class="logo">
     <h2>Привіт, <span id="username">...</span>!</h2>
-    <button class="tap-coin" id="tapBtn"><img src="greenCoin.jpeg" alt="Монетка Greek House"></button>
+    <button class="tap-coin" id="tapBtn"><img src="greenCoin.png" alt="Монетка Greek House"></button>
     <div class="counter" id="counter">Завантаження...</div>
     <img src="bg.jpg" alt="Gyros" class="gyros-img">
   </div>
@@ -548,11 +548,6 @@
     });
   }
 
-  document.getElementById("tapBtn").addEventListener("click", () => {
-    clicks++;
-    updateDisplay();
-    saveUserData();
-  });
   
 document.getElementById("tapBtn").addEventListener("click", (e) => {
   clicks++;
