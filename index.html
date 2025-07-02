@@ -11,7 +11,7 @@
   padding: 10px 16px;
   border-radius: 12px;
   display: inline-block;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   font-weight: bold;
 }
 
@@ -19,7 +19,7 @@
   width: 145px;
   height: 145px;
   border-radius: 50%;
-  margin: 40px auto 20px;
+  margin: 16px auto 20px;
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.1s;
@@ -27,6 +27,7 @@
   background-color: transparent;
   padding: 0;
   border: none;
+  transition: transform 0.15s ease;
 }
 
 .tap-coin img {
@@ -38,17 +39,18 @@
 }
 
 .tap-coin:active {
-  transform: scale(0.95);
+  transform: scale(1.08) rotate(1deg);
 }
-
 .plus-one {
   position: absolute;
-  color: #2e7d32;
+   color: white; /* 👈 було #2e7d32 */
+  text-shadow: 0 0 6px rgba(0,0,0,0.4); /* 👈 легке сяйво */
   font-size: 24px;
   font-weight: bold;
   animation: floatUp 0.8s ease forwards;
   pointer-events: none;
   z-index: 999;
+  filter: drop-shadow(0 0 4px #000);
 }
 
 @keyframes floatUp {
