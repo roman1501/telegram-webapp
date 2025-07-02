@@ -15,28 +15,28 @@
   font-weight: bold;
 }
 
-    .tap-coin {
+.tap-coin {
   width: 145px;
   height: 145px;
   border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   margin: 40px auto 20px;
   cursor: pointer;
-  position: relative;
   overflow: hidden;
   transition: transform 0.1s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: transparent; 
+  display: block; /* 👈 змінено */
+  background-color: transparent;
+  padding: 0;
+  border: none;
 }
+
 .tap-coin img {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* 👈 це ок */
   border-radius: 50%;
-  pointer-events: none;
 }
+
 .tap-coin:active {
   transform: scale(0.95);
 }
@@ -277,14 +277,21 @@
       background: #ccc;
       color: #333;
     }
+    .welcome-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
   </style>
 </head>
 <body>
 
   <!-- Тапати -->
   <div id="tap-tab" class="tab-content active">
-    <img src="logo.jfif" alt="Greek House logo" class="logo">
-    <h2 class="section-heading">Привіт, <span id="username">...</span>!</h2>
+    <div class="welcome-block">
+  <img src="logo.jfif" alt="Greek House logo" class="logo">
+  <h2 class="section-heading">Привіт, <span id="username">...</span>!</h2>
+</div>
     <button class="tap-coin" id="tapBtn"><img src="greenCoin.png" alt="Монетка Greek House"></button>
     <div class="counter" id="counter">Завантаження...</div>
     <img src="bg.jpg" alt="Gyros" class="gyros-img">
