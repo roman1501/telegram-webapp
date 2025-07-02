@@ -38,10 +38,11 @@
   border-radius: 50%;
 }
 
-.tap-coin:active {
-  transform: scale(1.05); /* 👈 робить ефект кліку "вгору" */
-  filter: brightness(1.1); /* 👈 легке підсвічування */
+.tap-coin.active {
+  transform: scale(1.05);
+  filter: brightness(1.1);
 }
+
 .plus-one {
   position: absolute;
    color: white; /* 👈 було #2e7d32 */
@@ -398,6 +399,23 @@
 
   let clicks = 0;
 
+
+const tapBtn = document.getElementById("tapBtn");
+
+tapBtn.addEventListener("touchstart", () => {
+  tapBtn.classList.add("active");
+});
+tapBtn.addEventListener("touchend", () => {
+  tapBtn.classList.remove("active");
+});
+tapBtn.addEventListener("mousedown", () => {
+  tapBtn.classList.add("active");
+});
+tapBtn.addEventListener("mouseup", () => {
+  tapBtn.classList.remove("active");
+});
+
+  
   async function fetchUserData() {
     const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
       headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
