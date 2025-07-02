@@ -64,11 +64,6 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
     const CORRECT_PIN = '9548';
 
-    const availableBonuses = [
-      { name: "gyros", title: "-50% на гірос" },
-      { name: "potato", title: "Велика картопля за 35 грн" }
-    ];
-
     function checkPin() {
       const pin = document.getElementById('pinInput').value.trim();
       const pinResult = document.getElementById('pinResult');
@@ -112,21 +107,10 @@
         return;
       }
 
-      const bonusRes = await fetch(`${supabaseUrl}/rest/v1/bonuses?user_id=eq.${promo.user_id}&used=eq.true&order=created_at.desc&limit=1`, {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`
-        }
-      });
+      // 1. Беремо назву бонусу з discount_codes (нове поле: bonus_name)
+      const bonusTitle = promo.bonus_name || "Обраний бонус";
 
-      const bonusData = await bonusRes.json();
-      let bonusTitle = "Обраний бонус";
-
-      if (bonusData.length > 0) {
-        const bonus = availableBonuses.find(b => b.name === bonusData[0].name);
-        bonusTitle = bonus?.title || bonusTitle;
-      }
-
+      // 2. Списуємо код
       const update = await fetch(`${supabaseUrl}/rest/v1/discount_codes?code=eq.${encodedCode}`, {
         method: "PATCH",
         headers: {
@@ -146,5 +130,6 @@
   </script>
 </body>
 </html>
+
 
 
