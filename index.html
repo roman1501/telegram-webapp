@@ -6,12 +6,13 @@
   <title>Greek House Tapper</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    :root {
-      --main-green: #004d00;
-      --accent-green: #43a047;
-      --light-green: #66bb6a;
-      --dark-green: #2e7d32;
-      --card-bg: #f5f5f5;
+        :root {
+      --main-green: #0f0;
+      --accent-green: #00ffaa;
+      --dark-bg: #050505;
+      --panel-bg: rgba(0, 255, 150, 0.1);
+      --card-bg: rgba(0, 255, 150, 0.05);
+      --neon-glow: 0 0 8px #0f0, 0 0 16px #0f0, 0 0 32px #0f0;
     }
 
     * {
@@ -19,180 +20,142 @@
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Orbitron', sans-serif;
       margin: 0;
       padding: 0;
+      background: var(--dark-bg);
+      color: #0f0;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: linear-gradient(to bottom, var(--main-green), #ffffff);
-      animation: fadeIn 1s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
 
     .tab-content {
       flex: 1;
       padding: 20px;
       display: none;
-      text-align: center;
       overflow-y: auto;
-      animation: slideIn 0.3s ease;
+      animation: fadeIn 0.4s ease-in;
     }
 
     .tab-content.active {
       display: block;
     }
 
-    @keyframes slideIn {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
     .tab-bar {
       display: flex;
       height: 60px;
-      background: var(--main-green);
-      border-top: 2px solid var(--dark-green);
-      box-shadow: 0 -3px 10px rgba(0,0,0,0.2);
+      background: var(--panel-bg);
+      border-top: 1px solid #0f0;
+      box-shadow: inset 0 1px 2px #0f0;
+      position: sticky;
+      bottom: 0;
     }
 
     .tab-button {
       flex: 1;
-      font-size: 18px;
       padding: 10px;
       cursor: pointer;
       border: none;
       background: none;
-      color: white;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-
-    .tab-button:hover {
-      background: rgba(255, 255, 255, 0.1);
+      color: #0f0;
+      text-shadow: var(--neon-glow);
+      font-size: 18px;
+      transition: all 0.3s;
     }
 
     .tab-button.active {
-      background: var(--light-green);
-      color: #fff;
+      background: var(--accent-green);
+      color: black;
+      font-weight: bold;
+      box-shadow: inset 0 0 12px #00ffaa;
     }
 
     .tap-button {
-      font-size: 28px;
-      padding: 20px 40px;
+      font-size: 24px;
+      padding: 18px 36px;
       margin-top: 30px;
-      background-color: var(--accent-green);
-      color: white;
+      background: linear-gradient(to right, #00ffaa, #0f0);
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
+      color: black;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 2px #000;
+      box-shadow: 0 0 12px #0f0, inset 0 0 8px #0f0;
       cursor: pointer;
-      user-select: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: transform 0.1s, background-color 0.3s;
+      transition: all 0.2s ease-in-out;
     }
 
-    .tap-button:active {
-      background-color: var(--dark-green);
-      transform: scale(0.97);
+    .tap-button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(to right, #0f0, #00ffaa);
     }
 
     .counter {
       margin-top: 20px;
-      font-size: 24px;
-      color: #333;
-      animation: pulse 1s infinite alternate ease-in-out;
-    }
-
-    @keyframes pulse {
-      from { transform: scale(1); }
-      to { transform: scale(1.05); }
-    }
-
-    .logo {
-      width: 100px;
-      margin: 10px auto;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    .gyros-img, .bonus-img {
-      max-width: 100%;
-      margin-top: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      font-size: 28px;
+      text-shadow: var(--neon-glow);
     }
 
     .bonus-list {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
     .bonus-card {
       background: var(--card-bg);
+      border: 1px solid #0f0;
       border-radius: 16px;
       padding: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-      text-align: left;
-      transition: transform 0.2s;
+      box-shadow: var(--neon-glow);
+      backdrop-filter: blur(6px);
+      transition: transform 0.3s ease;
     }
 
     .bonus-card:hover {
-      transform: scale(1.02);
-    }
-
-    .bonus-card img {
-      width: 100%;
-      border-radius: 12px;
-      margin-bottom: 12px;
+      transform: scale(1.03);
     }
 
     .bonus-title {
       font-size: 20px;
-      font-weight: bold;
-      color: var(--dark-green);
       margin-bottom: 8px;
+      text-shadow: var(--neon-glow);
     }
 
     .bonus-description {
       font-size: 16px;
-      margin-bottom: 12px;
-      color: #333;
+      margin-bottom: 10px;
+      color: #aaa;
     }
 
     .bonus-price {
       font-size: 18px;
-      color: #000;
-      font-weight: bold;
       margin-bottom: 10px;
+      color: #0f0;
     }
 
     .bonus-card button {
-      padding: 12px 20px;
-      background-color: var(--accent-green);
-      color: #fff;
+      padding: 12px 18px;
+      background: #0f0;
+      color: #000;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 16px;
+      box-shadow: var(--neon-glow);
       cursor: pointer;
-      transition: background-color 0.3s, transform 0.1s;
+      transition: background 0.2s, transform 0.1s;
     }
 
     .bonus-card button:hover {
-      background-color: var(--light-green);
+      background: #00ffaa;
+      transform: scale(1.02);
     }
 
-    .bonus-card button:active {
-      transform: scale(0.96);
-    }
-
-    .bonus-card.used {
-      opacity: 0.6;
-      filter: grayscale(60%);
+    .logo, .gyros-img, .bonus-card img {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 12px #0f0;
     }
 
     #confirmModal {
@@ -200,45 +163,34 @@
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 999;
+      background: rgba(0, 255, 0, 0.05);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
       justify-content: center;
       align-items: center;
-      animation: fadeIn 0.3s ease;
     }
 
     #confirmModal .modal-box {
-      background: white;
+      background: black;
+      color: #0f0;
       padding: 24px;
+      border: 1px solid #0f0;
       border-radius: 16px;
-      max-width: 90%;
+      box-shadow: var(--neon-glow);
       text-align: center;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-      animation: slideIn 0.4s ease;
-    }
-
-    #confirmModal p {
-      font-size: 18px;
-      color: #333;
+      max-width: 80%;
     }
 
     #confirmModal button {
-      padding: 12px 24px;
-      margin: 10px 8px 0;
+      margin: 8px;
+      padding: 10px 20px;
+      background: #0f0;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
-    }
-
-    #confirmActivate {
-      background: var(--accent-green);
-      color: white;
-    }
-
-    #cancelActivate {
-      background: #ccc;
-      color: #333;
+      color: black;
+      box-shadow: var(--neon-glow);
     }
   </style>
 </head>
