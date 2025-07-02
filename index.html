@@ -6,11 +6,19 @@
   <title>Greek House Tapper</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
+    .section-heading {
+  background-color: #CAFFB3;
+  padding: 10px 16px;
+  border-radius: 12px;
+  display: inline-block;
+  margin-bottom: 16px;
+  font-weight: bold;
+}
+
     .tap-coin {
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
-  border: 4px solid white;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   margin: 40px auto 20px;
   cursor: pointer;
@@ -20,7 +28,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #fff; /* на випадок, якщо img не завантажиться */
+  background-color: transparent; 
 }
 .tap-coin img {
   width: 100%;
@@ -276,7 +284,7 @@
   <!-- Тапати -->
   <div id="tap-tab" class="tab-content active">
     <img src="logo.jfif" alt="Greek House logo" class="logo">
-    <h2>Привіт, <span id="username">...</span>!</h2>
+    <h2 class="section-heading">Привіт, <span id="username">...</span>!</h2>
     <button class="tap-coin" id="tapBtn"><img src="greenCoin.png" alt="Монетка Greek House"></button>
     <div class="counter" id="counter">Завантаження...</div>
     <img src="bg.jpg" alt="Gyros" class="gyros-img">
@@ -284,7 +292,7 @@
 
  <!-- Ринок -->
 <div id="market-tab" class="tab-content">
-  <h2>🛒 Ринок бонусів</h2>
+  <h2 class="section-heading">🛒 Ринок бонусів</h2>
   <div class="bonus-list">
     <div class="bonus-card">
       <img src="gyros.jpeg" alt="Знижка на гірос">
@@ -315,7 +323,7 @@
 
   <!-- Інвентар -->
   <div id="inventory-tab" class="tab-content">
-    <h2>🎒 Інвентар</h2>
+    <h2 class="section-heading">🎒 Інвентар</h2>
     <div class="bonus-list"></div>
   </div>
 
