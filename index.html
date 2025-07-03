@@ -417,6 +417,8 @@
   const cancelBtn = document.getElementById("cancelActivate");
   let isHappyHour = false;
 
+    const happyHourStart = 17; // 17:00
+const happyHourEnd = 18;   // 18:00
   
   const availableBonuses = [
     {
@@ -446,8 +448,7 @@ updateHappyHourTimer(); // запустити одразу при заванта
 
   let clicks = 0;
 
-  const happyHourStart = 17; // 17:00
-const happyHourEnd = 18;   // 18:00
+
 const happyEl = document.getElementById("happyHourTimer");
 
 function updateHappyHourTimer() {
