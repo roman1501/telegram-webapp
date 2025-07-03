@@ -7,15 +7,21 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     .section-heading {
-  background: linear-gradient(to right, rgba(202, 255, 179, 0.85), rgba(202, 255, 179, 0.6));
-  padding: 10px 16px;
-  border-radius: 16px;
+  background: radial-gradient(
+    circle at center,
+    rgba(202, 255, 179, 0.9) 40%,
+    rgba(202, 255, 179, 0.5) 70%,
+    rgba(202, 255, 179, 0) 100%
+  );
+  padding: 12px 20px;
+  border-radius: 20px;
   display: inline-block;
   margin-bottom: 8px;
   font-weight: bold;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* легка тінь для глибини */
-  backdrop-filter: blur(2px); /* легке розмиття позаду, як скло */
-  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  transition: background 0.3s ease;
 }
 
 .tap-coin {
