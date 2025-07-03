@@ -67,7 +67,9 @@
   transition: transform 0.15s ease;
     -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-   transform: rotate(-5deg);
+}
+    .tap-coin.rotated {
+  transform: rotate(-5deg);
 }
 
 .tap-coin img {
@@ -398,6 +400,7 @@
   </div>
 
 <script>
+  
   const tg = window.Telegram.WebApp;
   tg.expand();
 
@@ -458,18 +461,20 @@ function updateHappyHourTimer() {
   const currentSeconds = now.getSeconds();
 
   const tapImg = document.querySelector("#tapBtn img");
-
+  const tapBtn = document.getElementById("tapBtn");
+  tapBtn.classList.add("rotated");
   if (currentHour >= happyHourStart && currentHour < happyHourEnd) {
     const minutesLeft = 59 - currentMinutes;
     const secondsLeft = 59 - currentSeconds;
-    happyEl.innerText = `🎉 Happy Hour! +2 кліки замість +1! Триватиме ще: ${minutesLeft} хв ${secondsLeft} сек`;
+    happyEl.innerText = `🎉 Happy Hour! +2 кліки! Залишилось: ${minutesLeft} хв ${secondsLeft} сек`;
     happyEl.style.display = "block";
     isHappyHour = true;
 
-    // 👇 Показати золоту монетку
+    // 🟡 Золота монетка + видалити нахил
     if (tapImg.src.includes("greenCoin.png")) {
       tapImg.src = "goldCoin.png";
     }
+    tapBtn.classList.remove("rotated");
 
   } else {
     const nextHappy = new Date();
@@ -482,10 +487,11 @@ function updateHappyHourTimer() {
     happyEl.style.display = "block";
     isHappyHour = false;
 
-    // 👇 Повернути зелену монетку
+    // 🟢 Зелена монетка + повертаємо нахил
     if (tapImg.src.includes("goldCoin.png")) {
       tapImg.src = "greenCoin.png";
     }
+    tapBtn.classList.add("rotated");
   }
 }
 
