@@ -337,6 +337,9 @@
   <h2 class="section-heading">Привіт, <span id="username">...</span>!</h2>
 </div>
         <div class="counter" id="counter">Завантаження...</div>
+    <div id="happyHourTimer" style="margin-top: 10px; font-size: 18px; color: #fff; background: #66bb6a; padding: 8px 16px; border-radius: 12px; display: none;">
+  ⏳ Happy Hour через ...
+</div>
     <button class="tap-coin" id="tapBtn"><img src="greenCoin.png" alt="Монетка Greek House"></button>
     <img src="bg.jpg" alt="Gyros" class="gyros-img">
   </div>
@@ -412,7 +415,9 @@
   const confirmModal = document.getElementById("confirmModal");
   const confirmBtn = document.getElementById("confirmActivate");
   const cancelBtn = document.getElementById("cancelActivate");
+  let isHappyHour = false;
 
+  
   const availableBonuses = [
     {
       name: "gyros",
@@ -436,8 +441,39 @@
       image: "pitagrylichederini.png"
     }
   ];
+setInterval(updateHappyHourTimer, 1000);
+updateHappyHourTimer(); // запустити одразу при завантаженні
 
   let clicks = 0;
+
+  const happyHourStart = 17; // 17:00
+const happyHourEnd = 18;   // 18:00
+const happyEl = document.getElementById("happyHourTimer");
+
+function updateHappyHourTimer() {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentSeconds = now.getSeconds();
+
+  if (currentHour >= happyHourStart && currentHour < happyHourEnd) {
+    const minutesLeft = 59 - currentMinutes;
+    const secondsLeft = 59 - currentSeconds;
+    happyEl.innerText = `🎉 Happy Hour! +2 кліки! Залишилось: ${minutesLeft} хв ${secondsLeft} сек`;
+    happyEl.style.display = "block";
+    isHappyHour = true;
+  } else {
+    const nextHappy = new Date();
+    nextHappy.setHours(happyHourStart, 0, 0, 0);
+    if (now >= nextHappy) nextHappy.setDate(nextHappy.getDate() + 1); // завтра
+    const diffMs = nextHappy - now;
+    const mins = Math.floor(diffMs / 60000);
+    const secs = Math.floor((diffMs % 60000) / 1000);
+    happyEl.innerText = `⏳ Happy Hour через: ${mins} хв ${secs} сек`;
+    happyEl.style.display = "block";
+    isHappyHour = false;
+  }
+}
 
 
 const tapBtn = document.getElementById("tapBtn");
@@ -626,13 +662,14 @@ tapBtn.addEventListener("mouseup", () => {
 
   
 document.getElementById("tapBtn").addEventListener("click", (e) => {
-  clicks++;
+  const addAmount = isHappyHour ? 2 : 1;
+  clicks += addAmount;
   updateDisplay();
   saveUserData();
 
   const plus = document.createElement("div");
   plus.className = "plus-one";
-  plus.innerText = "+1";
+  plus.innerText = `+${addAmount}`;
   document.body.appendChild(plus);
 
   const rect = e.target.getBoundingClientRect();
@@ -643,6 +680,7 @@ document.getElementById("tapBtn").addEventListener("click", (e) => {
     plus.remove();
   }, 800);
 });
+
 
   function showTab(tabId, buttonEl) {
     document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
