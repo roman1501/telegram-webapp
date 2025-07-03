@@ -537,7 +537,7 @@ async function checkDailyReward() {
   const data = await res.json();
   const lastRewardDate = data[0]?.last_claimed?.split('T')[0]; // Теж беремо тільки дату
 
-  if (!lastRewardDate || lastRewardDate !== today) {
+  if (true) {
     // Додати +100 кліків
     clicks += 100;
     updateDisplay();
