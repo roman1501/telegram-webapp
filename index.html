@@ -6,23 +6,51 @@
   <title>Greek House Tapper</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    .section-heading {
-  background: radial-gradient(
-    circle at center,
-    rgba(202, 255, 179, 0.9) 40%,
-    rgba(202, 255, 179, 0.5) 70%,
-    rgba(202, 255, 179, 0) 100%
-  );
+.section-heading {
+  position: relative;
   padding: 12px 20px;
   border-radius: 20px;
   display: inline-block;
   margin-bottom: 8px;
   font-weight: bold;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  transition: background 0.3s ease;
+  color: #003300;
+  z-index: 1;
+  background: linear-gradient(
+    145deg,
+    rgba(202, 255, 179, 0.85) 40%,
+    rgba(202, 255, 179, 0.3) 80%,
+    rgba(202, 255, 179, 0.0) 100%
+  );
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  overflow: hidden;
 }
+
+.section-heading::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  left: -30%;
+  width: 160%;
+  height: 160%;
+  background: conic-gradient(
+    from 90deg,
+    rgba(202, 255, 179, 0.12),
+    rgba(202, 255, 179, 0.05),
+    rgba(202, 255, 179, 0.1),
+    rgba(202, 255, 179, 0.02),
+    transparent,
+    rgba(202, 255, 179, 0.08)
+  );
+  opacity: 0.7;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  border-radius: 50%;
+  filter: blur(8px);
+}
+
 
 .tap-coin {
   width: 145px;
