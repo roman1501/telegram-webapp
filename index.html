@@ -535,7 +535,7 @@ async function checkDailyReward() {
   });
 
   const data = await res.json();
-  const lastRewardDate = data[0]?.last_reward_date?.split('T')[0]; // Теж беремо тільки дату
+  const lastRewardDate = data[0]?.last_claimed?.split('T')[0]; // Теж беремо тільки дату
 
   if (!lastRewardDate || lastRewardDate !== today) {
     // Додати +100 кліків
@@ -555,7 +555,7 @@ async function checkDailyReward() {
           Authorization: `Bearer ${supabaseKey}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ user_id: userId, last_reward_date: today })
+        body: JSON.stringify({ user_id: userId, last_claimed: today })
       });
     } else {
       // Оновити запис
@@ -566,7 +566,7 @@ async function checkDailyReward() {
           Authorization: `Bearer ${supabaseKey}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ last_reward_date: today })
+        body: JSON.stringify({ last_claimed: today })
       });
     }
   }
