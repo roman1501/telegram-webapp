@@ -524,7 +524,7 @@ tapBtn.addEventListener("mouseup", () => {
   tapBtn.classList.remove("active");
 });
 
-  async function checkDailyReward() {
+async function checkDailyReward() {
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
   const res = await fetch(`${supabaseUrl}/rest/v1/daily_rewards?user_id=eq.${userId}`, {
@@ -535,8 +535,9 @@ tapBtn.addEventListener("mouseup", () => {
   });
 
   const data = await res.json();
+  const lastRewardDate = data[0]?.last_reward_date?.split('T')[0]; // Теж беремо тільки дату
 
-  if (data.length === 0 || data[0].last_reward_date !== today) {
+  if (!lastRewardDate || lastRewardDate !== today) {
     // Додати +100 кліків
     clicks += 100;
     updateDisplay();
@@ -570,6 +571,7 @@ tapBtn.addEventListener("mouseup", () => {
     }
   }
 }
+
 
 function closeDailyRewardModal() {
   document.getElementById("dailyRewardModal").style.display = "none";
