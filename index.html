@@ -457,24 +457,38 @@ function updateHappyHourTimer() {
   const currentMinutes = now.getMinutes();
   const currentSeconds = now.getSeconds();
 
+  const tapImg = document.querySelector("#tapBtn img");
+
   if (currentHour >= happyHourStart && currentHour < happyHourEnd) {
     const minutesLeft = 59 - currentMinutes;
     const secondsLeft = 59 - currentSeconds;
-    happyEl.innerText = `🎉 Happy Hour! +2 кліки! Залишилось: ${minutesLeft} хв ${secondsLeft} сек`;
+    happyEl.innerText = `🎉 Happy Hour! +2 кліки замість +1! Триватиме ще: ${minutesLeft} хв ${secondsLeft} сек`;
     happyEl.style.display = "block";
     isHappyHour = true;
+
+    // 👇 Показати золоту монетку
+    if (tapImg.src.includes("greenCoin.png")) {
+      tapImg.src = "goldCoin.png";
+    }
+
   } else {
     const nextHappy = new Date();
     nextHappy.setHours(happyHourStart, 0, 0, 0);
-    if (now >= nextHappy) nextHappy.setDate(nextHappy.getDate() + 1); // завтра
+    if (now >= nextHappy) nextHappy.setDate(nextHappy.getDate() + 1);
     const diffMs = nextHappy - now;
     const mins = Math.floor(diffMs / 60000);
     const secs = Math.floor((diffMs % 60000) / 1000);
     happyEl.innerText = `⏳ Happy Hour через: ${mins} хв ${secs} сек`;
     happyEl.style.display = "block";
     isHappyHour = false;
+
+    // 👇 Повернути зелену монетку
+    if (tapImg.src.includes("goldCoin.png")) {
+      tapImg.src = "greenCoin.png";
+    }
   }
 }
+
 
 
 setInterval(updateHappyHourTimer, 1000);
