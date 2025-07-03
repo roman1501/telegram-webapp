@@ -443,14 +443,14 @@ const happyHourEnd = 18;   // 18:00
       image: "pitagrylichederini.png"
     }
   ];
-setInterval(updateHappyHourTimer, 1000);
-updateHappyHourTimer(); // запустити одразу при завантаженні
+
+
 
   let clicks = 0;
 
-
 const happyEl = document.getElementById("happyHourTimer");
 
+  
 function updateHappyHourTimer() {
   const now = new Date();
   const currentHour = now.getHours();
@@ -476,6 +476,10 @@ function updateHappyHourTimer() {
   }
 }
 
+
+setInterval(updateHappyHourTimer, 1000);
+
+updateHappyHourTimer(); // запустити одразу при завантаженні
 
 const tapBtn = document.getElementById("tapBtn");
 
