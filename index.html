@@ -430,11 +430,29 @@ backdrop-filter: blur(10px);
   transition: opacity 0.4s ease;
   pointer-events: none;
 } */
+#dailyRewardBlur {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 998;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.05); /* м’який димок */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#dailyRewardBlur.active {
+  opacity: 1;
+  pointer-events: auto;
+}
 
   </style>
 </head>
 <body>
 <!-- <div id="blurOverlay"></div> -->
+<div id="dailyRewardBlur"></div>
 
   <!-- Тапати -->
   <div id="tap-tab" class="tab-content active">
@@ -660,6 +678,7 @@ async function checkDailyReward() {
 
     // Показати модалку
     document.getElementById("dailyRewardModal").style.display = "flex";
+    document.getElementById("dailyRewardBlur").classList.add("active");
 
     if (data.length === 0) {
       // Створити запис
@@ -690,6 +709,7 @@ async function checkDailyReward() {
 
 
 function closeDailyRewardModal() {
+  document.getElementById("dailyRewardBlur").classList.remove("active");
   document.getElementById("dailyRewardModal").style.display = "none";
 }
 
