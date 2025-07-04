@@ -397,10 +397,23 @@
 .daily-reward-box button:hover {
   background: linear-gradient(to right, #7ddc7d, #b4e8b4);
 }
+#blurOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 998;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
 
   </style>
 </head>
 <body>
+<div id="blurOverlay"></div>
 
   <!-- Тапати -->
   <div id="tap-tab" class="tab-content active">
@@ -530,29 +543,16 @@ const happyHourEnd = 23;   // 18:00
   let clicks = 0;
 
 const happyEl = document.getElementById("happyHourTimer");
-function addBlurPreloader() {
-  const blur = document.createElement("div");
-  blur.id = "blurPreloader";
-  blur.style.position = "fixed";
-  blur.style.top = "0";
-  blur.style.left = "0";
-  blur.style.width = "100%";
-  blur.style.height = "100%";
-  blur.style.zIndex = "998"; // трохи нижче модалки
-  blur.style.backdropFilter = "blur(10px)";
-  blur.style.webkitBackdropFilter = "blur(10px)";
-  blur.style.transition = "opacity 0.3s ease";
-  blur.style.opacity = "0";
-
-  document.body.appendChild(blur);
-
-  // плавно з'являється
-  requestAnimationFrame(() => {
-    blur.style.opacity = "1";
-  });
-
-  return blur;
+function showBlur() {
+  const blur = document.getElementById("blurOverlay");
+  blur.style.opacity = "1";
 }
+
+function hideBlur() {
+  const blur = document.getElementById("blurOverlay");
+  blur.style.opacity = "0";
+}
+
 
   
 function updateHappyHourTimer() {
@@ -631,7 +631,7 @@ async function checkDailyReward() {
   const lastRewardDate = data[0]?.last_claimed?.split('T')[0]; // Теж беремо тільки дату
   
   if (true) {
-      const blur = addBlurPreloader();
+      showBlur();
     // Додати +100 кліків
     clicks += 100;
     updateDisplay();
@@ -663,7 +663,7 @@ async function checkDailyReward() {
         body: JSON.stringify({ last_claimed: today })
       });
     }
-       setTimeout(() => blur.remove(), 300);
+       setTimeout(() => hideBlur(), 300);
   }
 }
 
