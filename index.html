@@ -290,6 +290,21 @@
       animation: fadeIn 0.3s ease;
     }
 
+#confirmModal::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05); /* легкий білий димок */
+  z-index: -1;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease;
+}
+
+    
     #confirmModal .modal-box {
       background: white;
       padding: 24px;
@@ -300,6 +315,12 @@
       animation: slideIn 0.4s ease;
     }
 
+#confirmModal.active::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+    
     #confirmModal p {
       font-size: 18px;
       color: #333;
@@ -747,10 +768,14 @@ function closeDailyRewardModal() {
       if (!bonus.used) {
         const btn = card.querySelector("button");
         btn.addEventListener("click", () => {
-          confirmModal.style.display = "flex";
+          confirmModal.classList.add("active");
+confirmModal.style.display = "flex";
+
 
           const closeModal = () => {
-            confirmModal.style.display = "none";
+            confirmModal.classList.remove("active");
+confirmModal.style.display = "none";
+
             confirmBtn.onclick = null;
             cancelBtn.onclick = null;
           };
