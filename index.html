@@ -532,57 +532,64 @@ backdrop-filter: blur(10px);
   top: 0; left: 0;
   width: 100vw; height: 100vh;
   z-index: 2000;
-  /* Глибокий зелено-смарагдовий градієнт + трохи прозорості */
-  background: radial-gradient(ellipse at 55% 35%, #baf7d7 0%, #4ae07944 54%, #14b87233 70%, #005c46aa 88%, #000b 100%);
   justify-content: center;
   align-items: center;
-  animation: fadeInModalBg .3s;
+  /* Мінімалістичний напівпрозорий білий фон з блюром */
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
+  animation: fadeInModalBg .33s;
 }
 @keyframes fadeInModalBg {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
+
 .fortune-modal-content {
   position: relative;
-  /* Біло-зелений градієнт: від повітряної білизни до мʼякого світло-зеленого */
-  background: linear-gradient(134deg, #e9fff3 0%, #b6f3d7 55%, #a3ffd7 100%);
-  border-radius: 32px;
+  background: rgba(255,255,255, 0.78);
+  border-radius: 28px;
   padding: 36px 24px 24px 24px;
   min-width: 310px;
-  max-width: 96vw;
+  max-width: 95vw;
   max-height: 95vh;
-  /* Мʼяка тінь + обʼємне світіння */
-  box-shadow: 0 8px 36px 0 #057e4244, 0 0 0 4px #00c77717;
+  box-shadow: 0 6px 32px 0 #00884a28, 0 2px 18px #0002;
   text-align: center;
   animation: fortuneAppear 0.22s cubic-bezier(.18,.78,.61,1.09);
+  backdrop-filter: blur(0.1px); /* Трохи мʼякше вміст */
+  -webkit-backdrop-filter: blur(0.1px);
+  border: 1.5px solid #d3ffe2;
   overflow: visible;
 }
 
 @keyframes fortuneAppear {
-  from { transform: scale(0.93) translateY(38px); opacity: 0;}
+  from { transform: scale(0.97) translateY(28px); opacity: 0;}
   to   { transform: scale(1) translateY(0); opacity: 1;}
 }
 
 .fortune-close-btn {
   position: absolute;
-  top: 13px;
-  right: 19px;
-  background: linear-gradient(125deg, #36ae7c 60%, #20f7c7 100%);
+  top: 14px;
+  right: 18px;
+  background: rgba(44, 197, 125, 0.12);
   border: none;
-  font-size: 25px;
+  font-size: 26px;
   font-weight: 900;
-  color: #fff;
+  color: #12ae62;
   cursor: pointer;
   border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  box-shadow: 0 4px 12px #0fc59045;
-  transition: background .14s, color .18s;
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 4px 12px #0fc59013;
+  transition: background .16s, color .18s;
   z-index: 2;
   display: flex; align-items: center; justify-content: center;
 }
-.fortune-close-btn:hover { background: #e33636; color: #fff; }
+.fortune-close-btn:hover {
+  background: #e33636; 
+  color: #fff;
+}
 
 
 
@@ -1154,6 +1161,7 @@ fortuneModal.addEventListener('click', e => {
 </html>
 
   
+
 
 
 
