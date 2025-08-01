@@ -621,9 +621,13 @@ function updateHappyHourTimer() {
     nextHappy.setHours(happyHourStart, 0, 0, 0);
     if (now >= nextHappy) nextHappy.setDate(nextHappy.getDate() + 1);
     const diffMs = nextHappy - now;
-    const mins = Math.floor(diffMs / 60000);
-    const secs = Math.floor((diffMs % 60000) / 1000);
-    happyEl.innerText = `⏳ Happy Hour через: ${mins} хв ${secs} сек`;
+  const totalSeconds = Math.floor(diffMs / 1000);
+const hours = Math.floor(totalSeconds / 3600);
+const minutes = Math.floor((totalSeconds % 3600) / 60);
+const seconds = totalSeconds % 60;
+
+happyEl.innerText = `⏳ Happy Hour через: ${hours} год ${minutes} хв ${seconds} сек`;
+
     happyEl.style.display = "block";
     isHappyHour = false;
 
