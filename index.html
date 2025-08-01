@@ -680,43 +680,42 @@ happyEl.innerText = `⏳ Happy Hour через: ${hours} год ${minutes} хв`
 function animateCoinRain(count = 100, reward = 100) {
   const counter = document.getElementById("counter");
   const counterRect = counter.getBoundingClientRect();
-
   let added = 0;
 
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < count && added < reward; i++) {
     setTimeout(() => {
+      // 1. Монетка з’являється
       const coin = document.createElement("div");
       coin.classList.add("coin-fly");
 
-      // Стартова позиція — випадково поблизу центра
       const startX = window.innerWidth / 2 + (Math.random() * 80 - 40);
       const startY = window.innerHeight / 2 + (Math.random() * 80 - 40);
-
       coin.style.left = `${startX}px`;
       coin.style.top = `${startY}px`;
 
-      // Траєкторія до центру балансу
       const dx = counterRect.left + counterRect.width / 2 - startX;
       const dy = counterRect.top + counterRect.height / 2 - startY;
-
       coin.style.setProperty("--dx", `${dx}px`);
       coin.style.setProperty("--dy", `${dy}px`);
 
       document.body.appendChild(coin);
 
-      // Видалення монетки + збільшення балансу
-      setTimeout(() => {
-        coin.remove();
-        clicks++;
-        added++;
-        updateDisplay();
-        if (added === reward) {
-          saveUserData();
-        }
-      }, 900);
-    }, i * 15); // ⏱ затримка появи кожної монети (15мс)
+      // 2. Збільшуємо лічильник ПО 1
+      clicks++;
+      added++;
+      updateDisplay();
+
+      // 3. Зберігаємо, коли всі додалися
+      if (added === reward) {
+        saveUserData();
+      }
+
+      // 4. Монетка зникає через 900мс (анімка)
+      setTimeout(() => coin.remove(), 900);
+    }, i * 15); // затримка між монетками (можеш змінити на швидше чи повільніше)
   }
 }
+
 
 
 
