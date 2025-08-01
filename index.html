@@ -664,7 +664,14 @@ const hours = Math.floor(totalSeconds / 3600);
 const minutes = Math.floor((totalSeconds % 3600) / 60);
 const seconds = totalSeconds % 60;
 
-happyEl.innerText = `⏳ Happy Hour через: ${hours} год ${minutes} хв`;
+if (hours > 0) {
+  happyEl.innerText = `⏳ Happy Hour через: ${hours} год ${minutes} хв`;
+} else if (minutes > 0) {
+  happyEl.innerText = `⏳ Happy Hour через: ${minutes} хв`;
+} else {
+  happyEl.innerText = `⏳ Happy Hour вже зовсім скоро!`;
+}
+
 
     happyEl.style.display = "block";
     isHappyHour = false;
