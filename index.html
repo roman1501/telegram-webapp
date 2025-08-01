@@ -494,8 +494,8 @@ backdrop-filter: blur(10px);
 }
 .fortune-btn {
   position: fixed;
-  top: 16px;
-  right: 16px;
+  top: 32px;   /* 👈 більше відступу зверху */
+  right: 28px; /* 👈 більше відступу справа */
   z-index: 100;
   display: flex;
   align-items: center;
@@ -503,26 +503,32 @@ backdrop-filter: blur(10px);
   background: linear-gradient(135deg, #000000 60%, #1E1E1E 100%);
   border: none;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  padding: 7px;
+  box-shadow: 0 2px 18px 2px #ffe06655;
+  padding: 14px; /* 👈 більше внутрішнього відступу */
   cursor: pointer;
   outline: none;
   transition: box-shadow .2s, transform .12s;
 }
 .fortune-btn:hover {
-  box-shadow: 0 2px 16px 4px #eaff4c66;
-  transform: scale(1.08);
+  box-shadow: 0 2px 26px 8px #ffe06677;
+  transform: scale(1.10);
 }
 .fortune-btn img {
-  width: 60px;
-  height: 60px;
+  width: 72px;  /* 👈 велика іконка! */
+  height: 72px;
   pointer-events: none;
 }
 @media (max-width: 600px) {
-  .fortune-btn { top: 8px; right: 8px; padding: 3px;}
-  .fortune-btn img { width: 25px; height: 25px; }
+  .fortune-btn { 
+    top: 14px;
+    right: 12px;
+    padding: 7px;
+  }
+  .fortune-btn img { 
+    width: 44px; height: 44px; 
+  }
 }
-}
+
 
   </style>
 </head>
@@ -1061,6 +1067,7 @@ Telegram.WebApp.HapticFeedback.impactOccurred('medium');
 </html>
 
   
+
 
 
 
