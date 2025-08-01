@@ -515,6 +515,25 @@ backdrop-filter: blur(10px);
   .fortune-btn { top: 8px; right: 8px; padding: 3px;}
   .fortune-btn img { width: 25px; height: 25px; }
 }
+.tab-magnifier {
+  position: fixed;
+  width: 85px;
+  height: 85px;
+  border-radius: 42.5px;
+  border: 3.5px solid #fff;
+  box-shadow: 0 0 18px 3px #0005;
+  background: rgba(230,230,230,0.15);
+  pointer-events: none;
+  z-index: 1001;
+  backdrop-filter: blur(4.5px);
+  -webkit-backdrop-filter: blur(4.5px);
+  transition: left 0.12s, top 0.12s;
+}
+@media (max-width: 600px) {
+  .tab-magnifier {
+    width: 68px; height: 68px; border-radius: 34px;
+  }
+}
 
   </style>
 </head>
@@ -600,6 +619,7 @@ backdrop-filter: blur(10px);
     <button onclick="closeDailyRewardModal()">Окей</button>
   </div>
 </div>
+<div id="tabMagnifier" class="tab-magnifier" style="display:none;"></div>
 
 <script>
   
@@ -1042,6 +1062,71 @@ Telegram.WebApp.HapticFeedback.impactOccurred('medium');
     buttonEl.classList.add("active");
     if (tabId === "inventory-tab") loadInventory();
   }
+const tabBar = document.querySelector('.tab-bar');
+const tabs = Array.from(document.querySelectorAll('.tab-button'));
+const magnifier = document.getElementById('tabMagnifier');
+
+let swipeActiveTab = null;
+let lastTabIdx = -1;
+
+function getTabAt(x, y) {
+  for (let i = 0; i < tabs.length; i++) {
+    const rect = tabs[i].getBoundingClientRect();
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function showMagnifier(x, y) {
+  magnifier.style.display = 'block';
+  magnifier.style.left = (x - magnifier.offsetWidth/2) + 'px';
+  magnifier.style.top = (y - magnifier.offsetHeight/2) + 'px';
+}
+
+function hideMagnifier() {
+  magnifier.style.display = 'none';
+}
+
+function handleTouch(e) {
+  let touch = e.touches ? e.touches[0] : e;
+  let x = touch.clientX, y = touch.clientY;
+  showMagnifier(x, y);
+  const tabIdx = getTabAt(x, y);
+  if (tabIdx !== -1 && tabIdx !== lastTabIdx) {
+    tabs[tabIdx].click();
+    lastTabIdx = tabIdx;
+  }
+}
+
+tabBar.addEventListener('touchstart', (e) => {
+  handleTouch(e);
+  document.body.style.userSelect = "none";
+}, {passive: false});
+
+tabBar.addEventListener('touchmove', (e) => {
+  handleTouch(e);
+  e.preventDefault();
+}, {passive: false});
+
+tabBar.addEventListener('touchend', () => {
+  hideMagnifier();
+  lastTabIdx = -1;
+  document.body.style.userSelect = "";
+});
+
+tabBar.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return; // лише ЛКМ
+  handleTouch(e);
+  document.addEventListener('mousemove', handleTouch);
+  document.addEventListener('mouseup', function up() {
+    hideMagnifier();
+    lastTabIdx = -1;
+    document.removeEventListener('mousemove', handleTouch);
+    document.removeEventListener('mouseup', up);
+  });
+});
 
   fetchUserData().then(() => {
     setupMarketButtons();
@@ -1054,4 +1139,5 @@ Telegram.WebApp.HapticFeedback.impactOccurred('medium');
 </html>
 
   
+
 
