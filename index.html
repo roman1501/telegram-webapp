@@ -273,23 +273,22 @@
       transform: scale(0.96);
     }
 
-    #happyHourTimer {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 95vw;
+#happyHourTimer {
+  max-width: 300px; /* або 280px, як зручніше */
   margin: 10px auto;
-  padding: 8px 16px;
-  background: rgba(202, 255, 179, 0.2);
-  border: 1px solid rgba(202, 255, 179, 0.4);
-  border-radius: 20px;
-  backdrop-filter: blur(6px);
-  font-size: 16px;
-  font-weight: 500;
-  color: #ffffff;
   text-align: center;
-  display: block;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: rgba(202, 255, 179, 0.35); /* прозоро-зелена підкладка */
+  backdrop-filter: blur(6px);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: nowrap; /* ⛔️ Заборона переносу */
+  overflow: hidden;
+  text-overflow: ellipsis; /* (...) якщо щось піде за межі */
 }
+
 
     .bonus-card.used {
       opacity: 0.6;
