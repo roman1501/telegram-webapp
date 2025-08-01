@@ -6,6 +6,27 @@
   <title>Greek House Tapper</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
+    /* Стиль для монетки, що летить */
+.coin-fly {
+  position: fixed;
+  width: 24px;
+  height: 24px;
+  background-image: url("greenCoin.png"); /* Заміни на свою монету, або goldCoin.png */
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 9999;
+  animation: flyToCounter 1s ease-out forwards;
+}
+
+/* Анімація – летить до центру лічильника */
+@keyframes flyToCounter {
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.3);
+    opacity: 0;
+  }
+}
+
 .section-heading {
   position: relative;
   padding: 12px 20px;
@@ -656,6 +677,47 @@ happyEl.innerText = `⏳ Happy Hour через: ${hours} год ${minutes} хв`
   }
 }
 
+function animateCoinRain(count = 100, reward = 100) {
+  const counter = document.getElementById("counter");
+  const counterRect = counter.getBoundingClientRect();
+
+  let added = 0;
+
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const coin = document.createElement("div");
+      coin.classList.add("coin-fly");
+
+      // Стартова позиція — випадково поблизу центра
+      const startX = window.innerWidth / 2 + (Math.random() * 80 - 40);
+      const startY = window.innerHeight / 2 + (Math.random() * 80 - 40);
+
+      coin.style.left = `${startX}px`;
+      coin.style.top = `${startY}px`;
+
+      // Траєкторія до центру балансу
+      const dx = counterRect.left + counterRect.width / 2 - startX;
+      const dy = counterRect.top + counterRect.height / 2 - startY;
+
+      coin.style.setProperty("--dx", `${dx}px`);
+      coin.style.setProperty("--dy", `${dy}px`);
+
+      document.body.appendChild(coin);
+
+      // Видалення монетки + збільшення балансу
+      setTimeout(() => {
+        coin.remove();
+        clicks++;
+        added++;
+        updateDisplay();
+        if (added === reward) {
+          saveUserData();
+        }
+      }, 900);
+    }, i * 15); // ⏱ затримка появи кожної монети (15мс)
+  }
+}
+
 
 
 setInterval(updateHappyHourTimer, 1000);
@@ -732,6 +794,8 @@ async function checkDailyReward() {
 function closeDailyRewardModal() {
   document.getElementById("dailyRewardBlur").classList.remove("active");
   document.getElementById("dailyRewardModal").style.display = "none";
+
+   animateCoinRain(100);
 }
 
   async function fetchUserData() {
