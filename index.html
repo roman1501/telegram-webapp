@@ -486,33 +486,34 @@ backdrop-filter: blur(10px);
   pointer-events: auto;
 }
 .fortune-btn {
-  display: inline-flex;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 10px;
-  background: linear-gradient(135deg, #ffe066 60%, #f8f32b 100%);
+  background: linear-gradient(135deg, #000000 60%, #1E1E1E 100%);
   border: none;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  padding: 6px;
+  padding: 7px;
   cursor: pointer;
   outline: none;
   transition: box-shadow .2s, transform .12s;
-  vertical-align: middle;
-  position: relative;
 }
 .fortune-btn:hover {
   box-shadow: 0 2px 16px 4px #eaff4c66;
-  transform: scale(1.07);
+  transform: scale(1.08);
 }
 .fortune-btn img {
-  width: 34px;
-  height: 34px;
+  width: 60px;
+  height: 60px;
   pointer-events: none;
 }
 @media (max-width: 600px) {
-  .fortune-btn { margin-left: 4px; }
-  .fortune-btn img { width: 27px; height: 27px; }
+  .fortune-btn { top: 8px; right: 8px; padding: 3px;}
+  .fortune-btn img { width: 25px; height: 25px; }
 }
 
   </style>
@@ -523,13 +524,12 @@ backdrop-filter: blur(10px);
 
   <!-- Тапати -->
   <div id="tap-tab" class="tab-content active">
-<div class="welcome-block">
-  <div style="display:flex; align-items:center;">
-    <img src="logo.jfif" alt="Greek House logo" class="logo">
     <button id="fortuneBtn" class="fortune-btn" title="Колесо фортуни">
-      <img src="fortuneWheelIcon.png" alt="Колесо фортуни">
-    </button>
-  </div>
+  <img src="fortuneWheelIcon.png" alt="Колесо фортуни">
+</button>
+
+<div class="welcome-block">
+    <img src="logo.jfif" alt="Greek House logo" class="logo">
   <h2 class="section-heading">Привіт, <span id="username">...</span>!</h2>
 </div>
         <div class="counter" id="counter">Завантаження...</div>
@@ -1054,3 +1054,4 @@ Telegram.WebApp.HapticFeedback.impactOccurred('medium');
 </html>
 
   
+
