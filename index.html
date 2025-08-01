@@ -526,6 +526,48 @@ backdrop-filter: blur(10px);
     width: 44px; height: 44px; 
   }
 }
+.fortune-modal {
+  display: none; /* по замовчуванню приховано */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 2000;
+  background: rgba(0,0,0,0.62);
+  justify-content: center;
+  align-items: center;
+}
+
+.fortune-modal-content {
+  position: relative;
+  background: #fff;
+  border-radius: 26px;
+  padding: 36px 24px 24px 24px;
+  min-width: 310px;
+  max-width: 96vw;
+  max-height: 95vh;
+  box-shadow: 0 6px 36px #0008;
+  text-align: center;
+  animation: fortuneAppear 0.22s cubic-bezier(.18,.78,.61,1.09);
+}
+@keyframes fortuneAppear {
+  from { transform: scale(0.93) translateY(38px); opacity: 0;}
+  to   { transform: scale(1) translateY(0); opacity: 1;}
+}
+
+.fortune-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  font-weight: 700;
+  color: #888;
+  cursor: pointer;
+  transition: color .15s;
+  z-index: 1;
+}
+.fortune-close-btn:hover { color: #e33636; }
 
 
   </style>
@@ -610,6 +652,15 @@ backdrop-filter: blur(10px);
     <h3>🎉 Щоденна нагорода</h3>
     <p>+100 кліків за вхід сьогодні!</p>
     <button onclick="closeDailyRewardModal()">Окей</button>
+  </div>
+</div>
+  <div id="fortuneModal" class="fortune-modal">
+  <div class="fortune-modal-content">
+    <button id="closeFortuneModal" class="fortune-close-btn" title="Закрити">✕</button>
+    <h3>Колесо фортуни</h3>
+    <div id="fortuneWheelBlock" style="min-height:180px;display:flex;align-items:center;justify-content:center;">
+      <span style="font-size:22px; color:#bbb;">Тут буде колесо фортуни</span>
+    </div>
   </div>
 </div>
 <script>
@@ -1053,7 +1104,29 @@ Telegram.WebApp.HapticFeedback.impactOccurred('medium');
     buttonEl.classList.add("active");
     if (tabId === "inventory-tab") loadInventory();
   }
-  
+  const fortuneBtn = document.getElementById("fortuneBtn");
+const fortuneModal = document.getElementById("fortuneModal");
+const closeFortuneModal = document.getElementById("closeFortuneModal");
+
+// Відкрити модалку
+fortuneBtn.addEventListener('click', () => {
+  fortuneModal.style.display = 'flex';
+  document.body.style.overflow = "hidden"; // заблокуємо прокрутку фону
+});
+// Закрити модалку
+closeFortuneModal.addEventListener('click', () => {
+  fortuneModal.style.display = 'none';
+  document.body.style.overflow = ""; // повертаємо прокрутку
+});
+
+// (Опціонально: клік по затемненню теж закриває)
+fortuneModal.addEventListener('click', e => {
+  if (e.target === fortuneModal) {
+    fortuneModal.style.display = 'none';
+    document.body.style.overflow = "";
+  }
+});
+
   fetchUserData().then(() => {
     setupMarketButtons();
     loadInventory();
@@ -1065,6 +1138,7 @@ Telegram.WebApp.HapticFeedback.impactOccurred('medium');
 </html>
 
   
+
 
 
 
