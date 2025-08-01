@@ -978,6 +978,10 @@ confirmModal.style.display = "none";
 
   
 document.getElementById("tapBtn").addEventListener("click", (e) => {
+  if (window.navigator.vibrate) {
+  window.navigator.vibrate(30); // 30 мс — ідеально для кліку
+}
+
   const addAmount = isHappyHour ? 2 : 1;
   clicks += addAmount;
   updateDisplay();
