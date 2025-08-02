@@ -551,7 +551,6 @@ backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.78);
   border-radius: 28px;
   padding: 36px 24px 24px 24px;
-  min-height: 420px
   min-width: 310px;
   max-width: 95vw;
   max-height: 95vh;
@@ -682,7 +681,7 @@ backdrop-filter: blur(10px);
   <div class="fortune-modal-content">
     <button id="closeFortuneModal" class="fortune-close-btn" title="Закрити">✕</button>
     <h3>Колесо фортуни</h3>
-    <div id="fortuneWheelBlock" style="display:flex;align-items:center;justify-content:center;">
+    <div id="fortuneWheelBlock" style="min-height: 420px;display:flex;align-items:center;justify-content:center;">
       <span style="font-size:22px; color:#bbb;">Тут буде колесо фортуни</span>
     </div>
   </div>
@@ -1162,6 +1161,7 @@ fortuneModal.addEventListener('click', e => {
 </html>
 
   
+
 
 
 
