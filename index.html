@@ -682,7 +682,9 @@ backdrop-filter: blur(10px);
     <button id="closeFortuneModal" class="fortune-close-btn" title="Закрити">✕</button>
     <h3>Колесо фортуни</h3>
     <div id="fortuneWheelBlock" style="min-height: 520px;display:flex;align-items:center;justify-content:center;">
-      <span style="font-size:22px; color:#bbb;">Тут буде колесо фортуни</span>
+      <div id="fortuneWheelBlock" style="min-height: 520px; display:flex; align-items:center; justify-content:center;">
+  <canvas id="fortuneWheel" width="320" height="320"></canvas>
+</div>
     </div>
   </div>
 </div>
@@ -1149,6 +1151,80 @@ fortuneModal.addEventListener('click', e => {
     document.body.style.overflow = "";
   }
 });
+  const wheelCanvas = document.getElementById('fortuneWheel');
+const ctx = wheelCanvas.getContext('2d');
+const size = wheelCanvas.width;
+const center = size / 2;
+const radius = center - 12;
+
+const prizes = [
+  { label: '15 хв Happy Hour', color: '#7ee876', emoji: '⏰' },
+  { label: '+100 кліків', color: '#ffe066', emoji: '💸' },
+  { label: '+250 кліків', color: '#47b36a', emoji: '💎' },
+  { label: 'Скін “Томат”', color: '#fa5246', emoji: '🍅' },
+  { label: 'Скін “Баклажан”', color: '#9354e3', emoji: '🍆' }
+];
+
+function drawWheel(angle = 0) {
+  ctx.clearRect(0, 0, size, size);
+  const sectorAngle = 2 * Math.PI / prizes.length;
+
+  // Малюємо секції
+  for (let i = 0; i < prizes.length; i++) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(
+      center,
+      center,
+      radius,
+      angle + i * sectorAngle,
+      angle + (i + 1) * sectorAngle
+    );
+    ctx.closePath();
+    ctx.fillStyle = prizes[i].color;
+    ctx.shadowColor = '#0d6a4f';
+    ctx.shadowBlur = 8;
+    ctx.fill();
+    ctx.restore();
+
+    // Текст + emoji
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(angle + (i + 0.5) * sectorAngle);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 22px Segoe UI, Arial';
+    ctx.fillStyle = '#222';
+    ctx.fillText(prizes[i].emoji, radius - 60, 4);
+
+    ctx.font = '15px Segoe UI, Arial';
+    ctx.fillStyle = '#333';
+    ctx.fillText(prizes[i].label, radius - 60, 28);
+    ctx.restore();
+  }
+
+  // Малюємо центр (кнопка)
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(center, center, 55, 0, 2 * Math.PI);
+  ctx.fillStyle = '#fff';
+  ctx.shadowColor = '#47b36a44';
+  ctx.shadowBlur = 18;
+  ctx.fill();
+  ctx.restore();
+
+  // Текст по центру
+  ctx.save();
+  ctx.font = 'bold 20px Segoe UI, Arial';
+  ctx.fillStyle = '#31b055';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Крутити', center, center + 3);
+  ctx.restore();
+}
+
+drawWheel();
+
 
   fetchUserData().then(() => {
     setupMarketButtons();
@@ -1161,6 +1237,7 @@ fortuneModal.addEventListener('click', e => {
 </html>
 
   
+
 
 
 
