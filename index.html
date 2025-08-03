@@ -1148,9 +1148,13 @@ const closeFortuneModal = document.getElementById("closeFortuneModal");
 
 // Відкрити модалку
 fortuneBtn.addEventListener('click', () => {
+  // Показати плейсхолдер, якщо не все завантажилось
+  document.getElementById("wheelPlaceholder").style.display =
+    (imagesLoaded === prizeImages.length) ? "none" : "flex";
   fortuneModal.style.display = 'flex';
   document.body.style.overflow = "hidden"; // заблокуємо прокрутку фону
 });
+
 // Закрити модалку
 closeFortuneModal.addEventListener('click', () => {
   fortuneModal.style.display = 'none';
@@ -1194,13 +1198,16 @@ for (let i = 0; i < prizeImages.length; i++) {
   const img = new Image();
   img.src = prizeImages[i];
   img.onload = () => {
+    console.log('Loaded', img.src);
     imagesLoaded++;
     if (imagesLoaded === prizeImages.length) {
-      // Ховаємо плейсхолдер
       document.getElementById("wheelPlaceholder").style.display = "none";
       drawWheel();
     }
   };
+  img.onerror = () => {
+    console.error('Не вдалося завантажити:', img.src);
+  }
   loadedPrizeImages.push(img);
 }
 
@@ -1285,6 +1292,7 @@ drawWheel()
 </html>
 
   
+
 
 
 
