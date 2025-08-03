@@ -1195,42 +1195,49 @@ function drawWheel(angle = 0) {
 
   for (let i = 0; i < loadedPrizeImages.length; i++) {
     ctx.save();
+
+    // Переносимо координати в центр
+    ctx.translate(center, center);
+    // Повертаємо сектор на потрібний кут
+    ctx.rotate(angle + i * sectorAngle);
+
+    // Обрізаємо сектор (clip)
     ctx.beginPath();
-    ctx.moveTo(center, center);
-    ctx.arc(
-      center,
-      center,
-      radius,
-      angle + i * sectorAngle,
-      angle + (i + 1) * sectorAngle
-    );
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, radius, 0, sectorAngle);
     ctx.closePath();
     ctx.clip();
 
-    // Draw PNG in center of sector
-    const img = loadedPrizeImages[i];
-    const imgSize = radius * 1.25;
+    // Відстань від центру до картинки (в радіусах)
+    const distanceFromCenter = radius * 0.60;
+    const imgSize = radius * 0.82;
+
+    // Малюємо картинку по центру сектора
     ctx.drawImage(
-      img,
-      center - imgSize / 2,
-      center - imgSize / 2,
+      loadedPrizeImages[i],
+      -imgSize / 2,
+      -distanceFromCenter - imgSize / 2,
       imgSize,
       imgSize
     );
 
     ctx.restore();
+
+    // Малюємо бордер для сектора
     ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(angle + i * sectorAngle);
     ctx.beginPath();
-    ctx.moveTo(center, center);
-    ctx.arc(center, center, radius, angle + i * sectorAngle, angle + (i + 1) * sectorAngle);
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, radius, 0, sectorAngle);
     ctx.closePath();
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 6;
     ctx.strokeStyle = "#111";
     ctx.stroke();
     ctx.restore();
   }
 
-  // Центр (залишається, як було)
+  // Центр кнопка
   ctx.save();
   ctx.beginPath();
   ctx.arc(center, center, 55, 0, 2 * Math.PI);
@@ -1248,6 +1255,7 @@ function drawWheel(angle = 0) {
   ctx.fillText('Крутити', center, center + 3);
   ctx.restore();
 }
+
 drawWheel()
 
 
@@ -1262,6 +1270,7 @@ drawWheel()
 </html>
 
   
+
 
 
 
