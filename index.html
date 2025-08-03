@@ -1165,12 +1165,35 @@ const prizes = [
   { label: 'Скін “Баклажан”', color: '#9354e3', emoji: '🍆' }
 ];
 
+const prizeImages = [
+  '15happyHour.png',
+  '100clicks.png',
+  '250сlicks.png',
+  'tomatoSkin.png',
+  'eggplantSkin.png'
+];
+
+const loadedPrizeImages = [];
+let imagesLoaded = 0;
+
+// preload all images, then draw
+for (let i = 0; i < prizeImages.length; i++) {
+  const img = new Image();
+  img.src = prizeImages[i];
+  img.onload = () => {
+    imagesLoaded++;
+    if (imagesLoaded === prizeImages.length) {
+      drawWheel();
+    }
+  };
+  loadedPrizeImages.push(img);
+}
+
 function drawWheel(angle = 0) {
   ctx.clearRect(0, 0, size, size);
-  const sectorAngle = 2 * Math.PI / prizes.length;
+  const sectorAngle = 2 * Math.PI / loadedPrizeImages.length;
 
-  // Малюємо секції
-  for (let i = 0; i < prizes.length; i++) {
+  for (let i = 0; i < loadedPrizeImages.length; i++) {
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(center, center);
@@ -1182,28 +1205,32 @@ function drawWheel(angle = 0) {
       angle + (i + 1) * sectorAngle
     );
     ctx.closePath();
-    ctx.fillStyle = prizes[i].color;
-    ctx.shadowColor = '#0d6a4f';
-    ctx.shadowBlur = 8;
-    ctx.fill();
+    ctx.clip();
+
+    // Draw PNG in center of sector
+    const img = loadedPrizeImages[i];
+    const imgSize = radius * 1.25;
+    ctx.drawImage(
+      img,
+      center - imgSize / 2,
+      center - imgSize / 2,
+      imgSize,
+      imgSize
+    );
+
     ctx.restore();
-
-    // Текст + emoji
     ctx.save();
-    ctx.translate(center, center);
-    ctx.rotate(angle + (i + 0.5) * sectorAngle);
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 22px Segoe UI, Arial';
-    ctx.fillStyle = '#222';
-    ctx.fillText(prizes[i].emoji, radius - 60, 4);
-
-    ctx.font = '15px Segoe UI, Arial';
-    ctx.fillStyle = '#333';
-    ctx.fillText(prizes[i].label, radius - 60, 28);
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, angle + i * sectorAngle, angle + (i + 1) * sectorAngle);
+    ctx.closePath();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "#111";
+    ctx.stroke();
     ctx.restore();
   }
 
-  // Малюємо центр (кнопка)
+  // Центр (залишається, як було)
   ctx.save();
   ctx.beginPath();
   ctx.arc(center, center, 55, 0, 2 * Math.PI);
@@ -1213,7 +1240,6 @@ function drawWheel(angle = 0) {
   ctx.fill();
   ctx.restore();
 
-  // Текст по центру
   ctx.save();
   ctx.font = 'bold 20px Segoe UI, Arial';
   ctx.fillStyle = '#31b055';
@@ -1222,8 +1248,7 @@ function drawWheel(angle = 0) {
   ctx.fillText('Крутити', center, center + 3);
   ctx.restore();
 }
-
-drawWheel();
+drawWheel()
 
 
   fetchUserData().then(() => {
@@ -1237,6 +1262,7 @@ drawWheel();
 </html>
 
   
+
 
 
 
