@@ -591,6 +591,14 @@ backdrop-filter: blur(10px);
   color: #fff;
 }
 
+#wheelPlaceholder {
+  transition: opacity 0.5s;
+  opacity: 1;
+}
+#wheelPlaceholder.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
 
 
   </style>
@@ -681,19 +689,16 @@ backdrop-filter: blur(10px);
   <div class="fortune-modal-content">
     <button id="closeFortuneModal" class="fortune-close-btn" title="Закрити">✕</button>
     <h3>Колесо фортуни</h3>
-    <div id="fortuneWheelBlock" style="min-height: 520px;display:flex;align-items:center;justify-content:center;">
-      <div id="fortuneWheelBlock" style="min-height: 520px; display:flex; align-items:center; justify-content:center;">
+<div id="fortuneWheelBlock" style="position: relative; min-height: 360px; display: flex; align-items: center; justify-content: center;">
   <canvas id="fortuneWheel" width="320" height="320"></canvas>
-          <div id="wheelPlaceholder" style="
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.9);
-      font-size: 24px; color: #31b055; z-index: 5;">
+  <div id="wheelPlaceholder"
+       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+              display: flex; align-items: center; justify-content: center;
+              background: rgba(255,255,255,0.97); font-size: 24px; color: #31b055; z-index: 5;">
     Завантаження колеса...
   </div>
 </div>
-    </div>
+
   </div>
 </div>
 <script>
@@ -1280,6 +1285,7 @@ drawWheel()
 </html>
 
   
+
 
 
 
