@@ -1189,7 +1189,7 @@ const prizeImages = [
   'tomatoSkin.png',
   'eggplantSkin.png'
 ];
-
+console.log('Завантаження картинок:', prizeImages);
 const loadedPrizeImages = [];
 let imagesLoaded = 0;
 
@@ -1197,25 +1197,34 @@ let imagesLoaded = 0;
 for (let i = 0; i < prizeImages.length; i++) {
   const img = new Image();
   img.src = prizeImages[i];
+
   img.onload = () => {
-    console.log('Loaded', img.src);
+    console.log(`✅ Завантажено: ${img.src} (${i})`);
     imagesLoaded++;
     if (imagesLoaded === prizeImages.length) {
       document.getElementById("wheelPlaceholder").style.display = "none";
+      console.log("Масив loadedPrizeImages:", loadedPrizeImages); // ← встав сюди
       drawWheel();
+        document.body.insertAdjacentHTML(
+    'beforeend',
+    `<img src="${loadedPrizeImages[0]?.src}" style="position:fixed;top:0;right:0;width:40px;z-index:9999;border:2px solid red">`
+  );
+      console.log("🔵 Усі картинки завантажені, малюю колесо!");
     }
   };
-  img.onerror = () => {
-    console.error('Не вдалося завантажити:', img.src);
+  img.onerror = (e) => {
+    console.error(`❌ Не вдалося завантажити: ${img.src} (${i})`, e);
   }
   loadedPrizeImages.push(img);
 }
+
 
 function drawWheel(angle = 0) {
   ctx.clearRect(0, 0, size, size);
   const sectorAngle = 2 * Math.PI / loadedPrizeImages.length;
 
   for (let i = 0; i < loadedPrizeImages.length; i++) {
+    console.log(`Малюємо секцію ${i}, image:`, loadedPrizeImages[i]);
     ctx.save();
 
     // Переносимо координати в центр
@@ -1291,6 +1300,7 @@ function drawWheel(angle = 0) {
 </html>
 
   
+
 
 
 
