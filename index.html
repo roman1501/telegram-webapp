@@ -1226,26 +1226,34 @@ function drawWheel(angle = 0) {
   for (let i = 0; i < loadedPrizeImages.length; i++) {
     ctx.save();
 
-    // Переносимо координати в центр
     ctx.translate(center, center);
-    // Повертаємо сектор на потрібний кут
     ctx.rotate(angle + i * sectorAngle);
 
-    // Обрізаємо сектор (clip)
+    // Сектор-заливка (залишимо для контрасту)
+    ctx.fillStyle = ["#ff000022", "#00ff0022", "#0000ff22", "#ffff0022", "#ff00ff22"][i];
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.arc(0, 0, radius, 0, sectorAngle);
     ctx.closePath();
+    ctx.fill();
+
     ctx.clip();
 
-    // 🟢 (Опціонально) Кольоровий сектор для наочності (залиш чи прибери пізніше)
-    ctx.fillStyle = ["#ff000022", "#00ff0022", "#0000ff22", "#ffff0022", "#ff00ff22"][i];
-    ctx.fillRect(-radius, -radius, radius*2, radius*2);
+    // Ось тут максимальні значення!
+    const distanceFromCenter = radius * 0.85;  // дуже далеко від центру!
+    const imgSize = radius * 0.6;              // велика іконка
 
-    // Позиціонування картинки по сектору!
-    const distanceFromCenter = radius * 0.62;
-    const imgSize = radius * 0.65;
+    // Рамка для наочності (червона)
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(
+      -imgSize / 2,
+      -distanceFromCenter - imgSize / 2,
+      imgSize,
+      imgSize
+    );
 
+    // Нарешті малюємо іконку
     ctx.drawImage(
       loadedPrizeImages[i],
       -imgSize / 2,
@@ -1256,7 +1264,7 @@ function drawWheel(angle = 0) {
 
     ctx.restore();
 
-    // Малюємо бордер для сектора
+    // Бордер сектора
     ctx.save();
     ctx.translate(center, center);
     ctx.rotate(angle + i * sectorAngle);
@@ -1289,6 +1297,7 @@ function drawWheel(angle = 0) {
   ctx.restore();
 }
 
+
   
 
 
@@ -1304,6 +1313,7 @@ function drawWheel(angle = 0) {
 </html>
 
   
+
 
 
 
