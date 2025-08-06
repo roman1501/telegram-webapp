@@ -1226,10 +1226,11 @@ function drawWheel(angle = 0) {
   for (let i = 0; i < loadedPrizeImages.length; i++) {
     ctx.save();
 
+    // Центруємо сектор
     ctx.translate(center, center);
     ctx.rotate(angle + i * sectorAngle);
 
-    // Сектор-заливка (залишимо для контрасту)
+    // Заливка сектора (щоб бачити сектор)
     ctx.fillStyle = ["#ff000022", "#00ff0022", "#0000ff22", "#ffff0022", "#ff00ff22"][i];
     ctx.beginPath();
     ctx.moveTo(0, 0);
@@ -1237,13 +1238,11 @@ function drawWheel(angle = 0) {
     ctx.closePath();
     ctx.fill();
 
-    ctx.clip();
+    // Ось ці параметри гарантують, що іконку буде видно!
+    const distanceFromCenter = radius * 0.8;   // можна збільшити до 0.9, щоб було майже на краю
+    const imgSize = radius * 0.7;              // велика іконка
 
-    // Ось тут максимальні значення!
-    const distanceFromCenter = radius * 0.85;  // дуже далеко від центру!
-    const imgSize = radius * 0.6;              // велика іконка
-
-    // Рамка для наочності (червона)
+    // Малюємо рамку (червона)
     ctx.strokeStyle = "red";
     ctx.lineWidth = 4;
     ctx.strokeRect(
@@ -1253,7 +1252,7 @@ function drawWheel(angle = 0) {
       imgSize
     );
 
-    // Нарешті малюємо іконку
+    // Малюємо іконку
     ctx.drawImage(
       loadedPrizeImages[i],
       -imgSize / 2,
@@ -1297,7 +1296,6 @@ function drawWheel(angle = 0) {
   ctx.restore();
 }
 
-
   
 
 
@@ -1313,6 +1311,7 @@ function drawWheel(angle = 0) {
 </html>
 
   
+
 
 
 
