@@ -1221,13 +1221,9 @@ for (let i = 0; i < prizeImages.length; i++) {
 
 function drawWheel(angle = 0) {
   ctx.clearRect(0, 0, size, size);
-    for (let i = 0; i < loadedPrizeImages.length; i++) {
-    ctx.drawImage(loadedPrizeImages[i], center + i*50, center, 40, 40);
-  }
   const sectorAngle = 2 * Math.PI / loadedPrizeImages.length;
 
   for (let i = 0; i < loadedPrizeImages.length; i++) {
-    console.log(`Малюємо секцію ${i}, image:`, loadedPrizeImages[i]);
     ctx.save();
 
     // Переносимо координати в центр
@@ -1241,18 +1237,19 @@ function drawWheel(angle = 0) {
     ctx.arc(0, 0, radius, 0, sectorAngle);
     ctx.closePath();
     ctx.clip();
-    
- ctx.fillStyle = ["#ff000022", "#00ff0022", "#0000ff22", "#ffff0022", "#ff00ff22"][i];
-    ctx.fillRect(-radius, -radius, radius*2, radius*2);
-    // Відстань від центру до картинки (в радіусах)
-    const distanceFromCenter = radius * 0.60;
-    const imgSize = radius * 0.82;
 
-    // Новий варіант:
+    // 🟢 (Опціонально) Кольоровий сектор для наочності (залиш чи прибери пізніше)
+    ctx.fillStyle = ["#ff000022", "#00ff0022", "#0000ff22", "#ffff0022", "#ff00ff22"][i];
+    ctx.fillRect(-radius, -radius, radius*2, radius*2);
+
+    // Позиціонування картинки по сектору!
+    const distanceFromCenter = radius * 0.62;
+    const imgSize = radius * 0.65;
+
     ctx.drawImage(
       loadedPrizeImages[i],
       -imgSize / 2,
-      -imgSize / 2,      // <-- малює рівно по центру сектора
+      -distanceFromCenter - imgSize / 2,
       imgSize,
       imgSize
     );
@@ -1292,6 +1289,8 @@ function drawWheel(angle = 0) {
   ctx.restore();
 }
 
+  
+
 
 
   fetchUserData().then(() => {
@@ -1305,6 +1304,7 @@ function drawWheel(angle = 0) {
 </html>
 
   
+
 
 
 
