@@ -1153,6 +1153,8 @@ fortuneBtn.addEventListener('click', () => {
     (imagesLoaded === prizeImages.length) ? "none" : "flex";
   fortuneModal.style.display = 'flex';
   document.body.style.overflow = "hidden"; // заблокуємо прокрутку фону
+    resizeCanvasForDPR();
+  drawWheel(currentAngle);
 });
 
 // Закрити модалку
@@ -1168,11 +1170,35 @@ fortuneModal.addEventListener('click', e => {
     document.body.style.overflow = "";
   }
 });
-  const wheelCanvas = document.getElementById('fortuneWheel');
+const wheelCanvas = document.getElementById('fortuneWheel');
 const ctx = wheelCanvas.getContext('2d');
-const size = wheelCanvas.width;
-const center = size / 2;
-const radius = center - 12;
+
+let size, center, radius;
+function resizeCanvasForDPR() {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = wheelCanvas.getBoundingClientRect(); // реальний CSS-розмір
+
+  // підганяємо буфер під dpr
+  wheelCanvas.width  = Math.round(rect.width  * dpr);
+  wheelCanvas.height = Math.round(rect.height * dpr);
+
+  // масштаб контексту під dpr і робимо всі розрахунки в CSS-пікселях
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr, dpr);
+
+  size = rect.width;
+  center = size / 2;
+  radius = center - 12;
+
+  // краща інтерполяція
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+}
+
+// викликаємо одразу
+resizeCanvasForDPR();
+window.addEventListener('resize', () => { resizeCanvasForDPR(); drawWheel(currentAngle); });
+
 
 const prizes = [
   { label: '15 хв Happy Hour', color: '#7ee876', emoji: '⏰' },
@@ -1219,40 +1245,35 @@ for (let i = 0; i < prizeImages.length; i++) {
 }
 
 
+let currentAngle = 0;                 // якщо будеш крутити колесо — змінюй це
+const INITIAL_ANGLE = -Math.PI / 2;   // щоб перший сектор дивився вгору
+
 function drawWheel(angle = 0) {
-  ctx.clearRect(0, 0, size, size);
+  // чистимо в одиницях CSS (контекст уже масштабовано під dpr)
+  ctx.clearRect(0, 0, wheelCanvas.clientWidth, wheelCanvas.clientHeight);
+
   const sectorAngle = 2 * Math.PI / loadedPrizeImages.length;
 
   for (let i = 0; i < loadedPrizeImages.length; i++) {
+    // --- сектора з іконкою ---
     ctx.save();
-
-    // Центруємо сектор
     ctx.translate(center, center);
-    ctx.rotate(angle + i * sectorAngle);
 
-    // Заливка сектора (щоб бачити сектор)
-    ctx.fillStyle = ["#ff000022", "#00ff0022", "#0000ff22", "#ffff0022", "#ff00ff22"][i];
+    // повертаємо сектор на його бісектрису
+    ctx.rotate(INITIAL_ANGLE + angle + i * sectorAngle + sectorAngle / 2);
+
+    // маска сектора (акуратний клин від -½ до +½ сектора)
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.arc(0, 0, radius, 0, sectorAngle);
+    ctx.arc(0, 0, radius, -sectorAngle/2, sectorAngle/2);
     ctx.closePath();
-    ctx.fill();
+    ctx.clip();
 
-    // Ось ці параметри гарантують, що іконку буде видно!
-    const distanceFromCenter = radius * 0.8;   // можна збільшити до 0.9, щоб було майже на краю
-    const imgSize = radius * 0.7;              // велика іконка
+    // параметри іконки — підженеш за смаком
+    const distanceFromCenter = radius * 0.58;  // відстань по радіусу
+    const imgSize            = radius * 0.60;  // розмір іконки
 
-    // Малюємо рамку (червона)
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(
-      -imgSize / 2,
-      -distanceFromCenter - imgSize / 2,
-      imgSize,
-      imgSize
-    );
-
-    // Малюємо іконку
+    // центр іконки лягає на бісектрису сектора
     ctx.drawImage(
       loadedPrizeImages[i],
       -imgSize / 2,
@@ -1260,13 +1281,12 @@ function drawWheel(angle = 0) {
       imgSize,
       imgSize
     );
-
     ctx.restore();
 
-    // Бордер сектора
+    // --- обводка сектора ---
     ctx.save();
     ctx.translate(center, center);
-    ctx.rotate(angle + i * sectorAngle);
+    ctx.rotate(INITIAL_ANGLE + angle + i * sectorAngle);
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.arc(0, 0, radius, 0, sectorAngle);
@@ -1277,7 +1297,7 @@ function drawWheel(angle = 0) {
     ctx.restore();
   }
 
-  // Центр кнопка
+  // --- центральна кнопка ---
   ctx.save();
   ctx.beginPath();
   ctx.arc(center, center, 55, 0, 2 * Math.PI);
@@ -1296,6 +1316,7 @@ function drawWheel(angle = 0) {
   ctx.restore();
 }
 
+
   
 
 
@@ -1311,6 +1332,7 @@ function drawWheel(angle = 0) {
 </html>
 
   
+
 
 
 
