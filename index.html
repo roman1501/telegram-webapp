@@ -591,14 +591,6 @@ backdrop-filter: blur(10px);
   color: #fff;
 }
 
-#wheelPlaceholder {
-  transition: opacity 0.5s;
-  opacity: 1;
-}
-#wheelPlaceholder.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
 
 
   </style>
@@ -688,15 +680,7 @@ backdrop-filter: blur(10px);
   <div id="fortuneModal" class="fortune-modal">
   <div class="fortune-modal-content">
     <button id="closeFortuneModal" class="fortune-close-btn" title="Закрити">✕</button>
-    <h3>Колесо фортуни</h3>
-<div id="fortuneWheelBlock" style="position: relative; min-height: 360px; display: flex; align-items: center; justify-content: center;">
-  <canvas id="fortuneWheel" width="320" height="320"></canvas>
-  <div id="wheelPlaceholder"
-       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-              display: flex; align-items: center; justify-content: center;
-              background: rgba(255,255,255,0.97); font-size: 24px; color: #31b055; z-index: 5;">
-    Завантаження колеса...
-  </div>
+    <h3>Модалочка, робота в процесі:)</h3>
 </div>
 
   </div>
@@ -1142,184 +1126,29 @@ Telegram.WebApp.HapticFeedback.impactOccurred('medium');
     buttonEl.classList.add("active");
     if (tabId === "inventory-tab") loadInventory();
   }
-  const fortuneBtn = document.getElementById("fortuneBtn");
+const fortuneBtn = document.getElementById("fortuneBtn");
 const fortuneModal = document.getElementById("fortuneModal");
 const closeFortuneModal = document.getElementById("closeFortuneModal");
 
 // Відкрити модалку
 fortuneBtn.addEventListener('click', () => {
-  // Показати плейсхолдер, якщо не все завантажилось
-  document.getElementById("wheelPlaceholder").style.display =
-    (imagesLoaded === prizeImages.length) ? "none" : "flex";
   fortuneModal.style.display = 'flex';
-  document.body.style.overflow = "hidden"; // заблокуємо прокрутку фону
-    resizeCanvasForDPR();
-  drawWheel(currentAngle);
+  document.body.style.overflow = "hidden"; // блокуємо прокрутку фону
 });
 
-// Закрити модалку
+// Закрити модалку кнопкою
 closeFortuneModal.addEventListener('click', () => {
   fortuneModal.style.display = 'none';
   document.body.style.overflow = ""; // повертаємо прокрутку
 });
 
-// (Опціонально: клік по затемненню теж закриває)
+// Закрити модалку кліком по фону
 fortuneModal.addEventListener('click', e => {
   if (e.target === fortuneModal) {
     fortuneModal.style.display = 'none';
     document.body.style.overflow = "";
   }
 });
-const wheelCanvas = document.getElementById('fortuneWheel');
-const ctx = wheelCanvas.getContext('2d');
-
-let size, center, radius;
-function resizeCanvasForDPR() {
-  const dpr = window.devicePixelRatio || 1;
-  const rect = wheelCanvas.getBoundingClientRect(); // реальний CSS-розмір
-
-  // підганяємо буфер під dpr
-  wheelCanvas.width  = Math.round(rect.width  * dpr);
-  wheelCanvas.height = Math.round(rect.height * dpr);
-
-  // масштаб контексту під dpr і робимо всі розрахунки в CSS-пікселях
-  ctx.setTransform(1,0,0,1,0,0);
-  ctx.scale(dpr, dpr);
-
-  size = rect.width;
-  center = size / 2;
-  radius = center - 12;
-
-  // краща інтерполяція
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-}
-
-// викликаємо одразу
-resizeCanvasForDPR();
-window.addEventListener('resize', () => { resizeCanvasForDPR(); drawWheel(currentAngle); });
-
-
-const prizes = [
-  { label: '15 хв Happy Hour', color: '#7ee876', emoji: '⏰' },
-  { label: '+100 кліків', color: '#ffe066', emoji: '💸' },
-  { label: '+250 кліків', color: '#47b36a', emoji: '💎' },
-  { label: 'Скін “Томат”', color: '#fa5246', emoji: '🍅' },
-  { label: 'Скін “Баклажан”', color: '#9354e3', emoji: '🍆' }
-];
-
-const prizeImages = [
-  '15happyHour.png',
-  '100clicks.png',
-  '250clicks.png',
-  'tomatoSkin.png',
-  'eggplantSkin.png'
-];
-console.log('Завантаження картинок:', prizeImages);
-const loadedPrizeImages = [];
-let imagesLoaded = 0;
-
-// preload all images, then draw
-for (let i = 0; i < prizeImages.length; i++) {
-  const img = new Image();
-  img.src = prizeImages[i];
-
-  img.onload = () => {
-    console.log(`✅ Завантажено: ${img.src} (${i})`);
-    imagesLoaded++;
-    if (imagesLoaded === prizeImages.length) {
-      document.getElementById("wheelPlaceholder").style.display = "none";
-      console.log("Масив loadedPrizeImages:", loadedPrizeImages); // ← встав сюди
-      drawWheel();
-        document.body.insertAdjacentHTML(
-    'beforeend',
-    `<img src="${loadedPrizeImages[0]?.src}" style="position:fixed;top:0;right:0;width:40px;z-index:9999;border:2px solid red">`
-  );
-      console.log("🔵 Усі картинки завантажені, малюю колесо!");
-    }
-  };
-  img.onerror = (e) => {
-    console.error(`❌ Не вдалося завантажити: ${img.src} (${i})`, e);
-  }
-  loadedPrizeImages.push(img);
-}
-
-
-let currentAngle = 0;                 // якщо будеш крутити колесо — змінюй це
-const INITIAL_ANGLE = -Math.PI / 2;   // щоб перший сектор дивився вгору
-
-function drawWheel(angle = 0) {
-  // чистимо в одиницях CSS (контекст уже масштабовано під dpr)
-  ctx.clearRect(0, 0, wheelCanvas.clientWidth, wheelCanvas.clientHeight);
-
-  const sectorAngle = 2 * Math.PI / loadedPrizeImages.length;
-
-  for (let i = 0; i < loadedPrizeImages.length; i++) {
-    // --- сектора з іконкою ---
-    ctx.save();
-    ctx.translate(center, center);
-
-    // повертаємо сектор на його бісектрису
-    ctx.rotate(INITIAL_ANGLE + angle + i * sectorAngle + sectorAngle / 2);
-
-    // маска сектора (акуратний клин від -½ до +½ сектора)
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.arc(0, 0, radius, -sectorAngle/2, sectorAngle/2);
-    ctx.closePath();
-    ctx.clip();
-
-    // параметри іконки — підженеш за смаком
-    const distanceFromCenter = radius * 0.58;  // відстань по радіусу
-    const imgSize            = radius * 0.60;  // розмір іконки
-
-    // центр іконки лягає на бісектрису сектора
-    ctx.drawImage(
-      loadedPrizeImages[i],
-      -imgSize / 2,
-      -distanceFromCenter - imgSize / 2,
-      imgSize,
-      imgSize
-    );
-    ctx.restore();
-
-    // --- обводка сектора ---
-    ctx.save();
-    ctx.translate(center, center);
-    ctx.rotate(INITIAL_ANGLE + angle + i * sectorAngle);
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.arc(0, 0, radius, 0, sectorAngle);
-    ctx.closePath();
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = "#111";
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // --- центральна кнопка ---
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(center, center, 55, 0, 2 * Math.PI);
-  ctx.fillStyle = '#fff';
-  ctx.shadowColor = '#47b36a44';
-  ctx.shadowBlur = 18;
-  ctx.fill();
-  ctx.restore();
-
-  ctx.save();
-  ctx.font = 'bold 20px Segoe UI, Arial';
-  ctx.fillStyle = '#31b055';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('Крутити', center, center + 3);
-  ctx.restore();
-}
-
-
-  
-
-
 
   fetchUserData().then(() => {
     setupMarketButtons();
@@ -1332,6 +1161,7 @@ function drawWheel(angle = 0) {
 </html>
 
   
+
 
 
 
