@@ -1282,6 +1282,38 @@ const mcPlateEl = document.getElementById('mcPlate');
 const mcMsgEl = document.getElementById('mcMsg');
 const mcOrderEl = document.getElementById('mcOrder');
 const mcResetBtn = document.getElementById('mcReset');
+const miniCafeEl = document.getElementById('miniCafe');
+
+function scrollMiniCafeToBottom() {
+  // чекаємо, поки DOM оновиться (повідомлення вже вставилось)
+  requestAnimationFrame(() => {
+    const target = miniCafeEl.scrollHeight - miniCafeEl.clientHeight;
+
+    // пробуємо нативний smooth
+    try {
+      miniCafeEl.scrollTo({ top: target, behavior: 'smooth' });
+    } catch (e) {
+      // fallback: м’яка анімація вручну
+      const start = miniCafeEl.scrollTop;
+      const dist = target - start;
+      const dur = 350;
+      let t0 = null;
+      function step(ts) {
+        if (!t0) t0 = ts;
+        const p = Math.min((ts - t0) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3); // easeOutCubic
+        miniCafeEl.scrollTop = start + dist * ease;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+  });
+}
+  function scrollMiniCafeToBottomSafe() {
+  scrollMiniCafeToBottom();          // одразу після повідомлення
+  setTimeout(scrollMiniCafeToBottom, 520); // вдруге після додавання останнього чіпа
+}
+
 
 /** Набір «рецептів» — можна розширювати */
 const RECIPES = [
@@ -1320,6 +1352,7 @@ function pickRecipe() {
   mcMsgEl.innerHTML = '';
   renderIngredients();
   mcPlateEl.innerHTML = '';
+  miniCafeEl.scrollTop = 0;
 }
 
 function renderIngredients() {
@@ -1399,6 +1432,7 @@ async function onRecipeComplete() {
   await saveUserData();
 
   mcMsgEl.innerHTML = `<div class="success-msg">🎉 Готово! +${reward} кліків за «${currentRecipe.title}»</div>`;
+  scrollMiniCafeToBottomSafe();
   Telegram.WebApp.HapticFeedback.notificationOccurred('success');
 }
 
@@ -1426,6 +1460,7 @@ fortuneBtn.addEventListener('click', () => {
 </html>
 
   
+
 
 
 
