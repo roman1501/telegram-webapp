@@ -553,14 +553,16 @@ backdrop-filter: blur(10px);
   padding: 36px 24px 24px 24px;
   min-width: 310px;
   max-width: 95vw;
-  max-height: 95vh;
+  max-height: 90dvh;
   box-shadow: 0 6px 32px 0 #00884a28, 0 2px 18px #0002;
   text-align: center;
   animation: fortuneAppear 0.22s cubic-bezier(.18,.78,.61,1.09);
   backdrop-filter: blur(0.1px); /* Трохи мʼякше вміст */
   -webkit-backdrop-filter: blur(0.1px);
   border: 1.5px solid #d3ffe2;
-  overflow: visible;
+  display: flex;
+  flex-direction: column;
+   overflow: hidden;
 }
 
 @keyframes fortuneAppear {
@@ -591,7 +593,7 @@ backdrop-filter: blur(10px);
   color: #fff;
 }
 /* ===== Mini Café ===== */
-.mini-cafe { display:flex; flex-direction:column; gap:12px; align-items:center; }
+.mini-cafe { display:flex; flex-direction:column; gap:12px; align-items:center;   overflow: auto; padding-bottom: 12px; flex:1 1 auto;  -webkit-overflow-scrolling:touch;  padding:12px; }
 .mini-cafe .order { font-weight:700; color:#0c6a3a; background:#eaffea; border:1px solid #c8f5d9; padding:8px 12px; border-radius:12px; }
 .mini-cafe .worktop { display:flex; gap:12px; align-items:flex-end; justify-content:center; }
 .ingredients {
@@ -664,7 +666,39 @@ backdrop-filter: blur(10px);
     bottom: 30px;
   }
 }
+.mc-footer {
+  bottom: 0;
+  display: flex;
+  flex:0 0 auto;  
+  position:static;   
+  gap: 8px;
+  justify-content: center;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 10px 12px;
+    padding-bottom:calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid #e8f5ee;
+  border-radius: 0 0 24px 24px; /* щоб зливалося з радіусами модалки */
+  z-index: 1;
+}
 
+.mc-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#mcReset { background:#66bb6a; color:#fff; }
+#mcClose { background:#e3e3e3; color:#333; }
+    @media (max-width: 380px){
+  .ingredients{
+    grid-template-columns:repeat(2, minmax(72px,1fr));
+    gap:12px;
+  }
+  .ingredient img{ width:44px; height:44px; }
+}
   </style>
 </head>
 <body>
@@ -673,7 +707,7 @@ backdrop-filter: blur(10px);
 
   <!-- Тапати -->
   <div id="tap-tab" class="tab-content active">
-    <button id="fortuneBtn" class="fortune-btn" title="Колесо фортуни">
+    <button id="fortuneBtn" class="fortune-btn" title="Міні-кафе">
 <!--   <img src="fortuneWheelIcon.png" alt="Колесо фортуни"> -->
 </button>
 
@@ -767,7 +801,10 @@ backdrop-filter: blur(10px);
 
   <div class="badge-tip">Тицяй інгредієнти у правильному порядку 😉</div>
   <div id="mcMsg"></div>
-  <button id="mcReset" style="margin-top:6px; padding:10px 16px; border:none; border-radius:10px; background:#66bb6a; color:#fff; font-weight:700; cursor:pointer;">Скинути</button>
+  </div>
+  <div class="mc-footer">
+  <button id="mcReset" class="mc-btn">Скинути</button>
+  <button id="mcClose" class="mc-btn">Закрити</button>
 </div>
 
 </div>
@@ -1368,7 +1405,11 @@ async function onRecipeComplete() {
 mcResetBtn.addEventListener('click', () => {
   pickRecipe();
 });
-
+const mcCloseBtn = document.getElementById('mcClose');
+mcCloseBtn.addEventListener('click', () => {
+  fortuneModal.style.display = 'none';
+  document.body.style.overflow = "";
+});
 /** Коли відкривається твоя модалка — стартуємо гру */
 fortuneBtn.addEventListener('click', () => {
   pickRecipe();
@@ -1385,6 +1426,7 @@ fortuneBtn.addEventListener('click', () => {
 </html>
 
   
+
 
 
 
