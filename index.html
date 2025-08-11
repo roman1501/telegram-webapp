@@ -594,15 +594,43 @@ backdrop-filter: blur(10px);
 .mini-cafe { display:flex; flex-direction:column; gap:12px; align-items:center; }
 .mini-cafe .order { font-weight:700; color:#0c6a3a; background:#eaffea; border:1px solid #c8f5d9; padding:8px 12px; border-radius:12px; }
 .mini-cafe .worktop { display:flex; gap:12px; align-items:flex-end; justify-content:center; }
-.ingredients { display:grid; grid-template-columns:repeat(4,minmax(62px,1fr)); gap:10px; }
+.ingredients {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(62px,1fr));
+  gap:10px;
+}
 .ingredient { background:#fff; border:1px solid #e3f7ea; border-radius:12px; padding:8px; cursor:pointer; box-shadow:0 2px 8px #0001; transition:transform .12s; font-size:12px; }
 .ingredient:hover { transform:translateY(-1px); }
 .ingredient.used { opacity:.45; pointer-events:none; }
 .ingredient img { width:48px; height:48px; object-fit:cover; border-radius:10px; display:block; margin:0 auto 6px; }
 
-.plate-wrap { position:relative; width:180px; height:120px; }
-.plate { position:absolute; left:0; right:0; bottom:0; margin:auto; width:180px; height:70px; background:radial-gradient(ellipse at center, #fff 60%, #eee 100%); border:1px solid #e5e5e5; border-radius:0 0 80px 80px; box-shadow:0 6px 16px #0002 inset; }
-.on-plate { position:absolute; left:50%; bottom:28px; transform:translateX(-50%); display:flex; gap:6px; flex-wrap:wrap; justify-content:center; width:160px; }
+.plate-wrap {
+  position:relative;
+  width: 250px;
+  height: 160px;
+}
+.plate {
+  position:absolute;
+  left:0; right:0; bottom:0;
+  margin:auto;
+  width: 250px;
+  height: 90px;
+  background: radial-gradient(ellipse at center, #fff 60%, #eee 100%);
+  border: 1px solid #e5e5e5;
+  border-radius: 0 0 120px 120px;
+  box-shadow: 0 6px 16px #0002 inset;
+}
+    .on-plate {
+  position:absolute;
+  left:50%;
+  bottom:35px;
+  transform:translateX(-50%);
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+  width: 210px;
+}
 
 .badge-tip { font-size:12px; color:#3a3a3a; opacity:.8; }
 
@@ -613,7 +641,29 @@ backdrop-filter: blur(10px);
 .success-msg { color:#0d8a54; font-weight:700; margin-top:6px; }
 .err-msg { color:#b00020; font-weight:600; margin-top:6px; }
 
-
+@media (max-width: 600px) {
+  .mini-cafe .worktop {
+    flex-direction: column;
+    align-items: center;
+  }
+  .ingredients {
+    grid-template-columns:repeat(2, minmax(80px,1fr));
+    gap:14px;
+  }
+  .plate-wrap {
+    width: 200px;
+    height: 140px;
+  }
+  .plate {
+    width: 200px;
+    height: 80px;
+    border-radius: 0 0 100px 100px;
+  }
+  .on-plate {
+    width: 170px;
+    bottom: 30px;
+  }
+}
 
   </style>
 </head>
@@ -1335,6 +1385,7 @@ fortuneBtn.addEventListener('click', () => {
 </html>
 
   
+
 
 
 
