@@ -647,6 +647,8 @@ backdrop-filter: blur(10px);
   .mini-cafe .worktop {
     flex-direction: column;
     align-items: center;
+  .mini-cafe .worktop { gap: 8px; }     /* було 12px */
+  .plate-wrap { margin-top: -12px; }     /* підняли тарілку вище */
   }
   .ingredients {
     grid-template-columns:repeat(2, minmax(80px,1fr));
@@ -818,7 +820,7 @@ backdrop-filter: blur(10px);
 <div id="miniCafe" class="mini-cafe">
   <div class="order" id="mcOrder">Замовлення: Гірос класичний</div>
   <div class="hint-row">
-  <button id="mcHintToggle" class="hint-toggle">Рецепт</button>
+  <button id="mcHintToggle" class="hint-toggle">Підглянути рецепт</button>
 </div>
 <div id="mcRecipeHint" class="recipe-hint"></div>
 
@@ -1535,6 +1537,7 @@ mcHintToggle.addEventListener('click', ()=>{
 </html>
 
   
+
 
 
 
