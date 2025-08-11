@@ -591,6 +591,31 @@ backdrop-filter: blur(10px);
 .fortune-close-btn:hover {
   background: #e33636; 
   color: #fff;
+  /* тримаємо стабільну ширину модалки */
+.fortune-modal-content{
+  width: min(520px, 95vw);
+}
+
+/* на мобілці — теж без «стрибків» */
+@media (max-width: 600px){
+  .fortune-modal-content{
+    width: calc(100vw - 24px); /* відступи по краях */
+  }
+}
+
+/* не даємо внутрішнім блокам розширювати контент */
+#miniCafe, .recipe-hint{
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* дрібний бонус: резерв під скролбар, де підтримується */
+.mini-cafe{ scrollbar-gutter: stable; }
+
+/* щоб чіпи не ламали рядок всередині себе */
+.step-chip{ white-space: nowrap; }
+
 }
 /* ===== Mini Café ===== */
 .mini-cafe { display:flex; flex-direction:column; gap:12px; align-items:center;   overflow: auto; padding-bottom: 12px; flex:1 1 auto;  -webkit-overflow-scrolling:touch;  padding:12px; }
@@ -1537,6 +1562,7 @@ mcHintToggle.addEventListener('click', ()=>{
 </html>
 
   
+
 
 
 
