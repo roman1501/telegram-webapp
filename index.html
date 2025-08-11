@@ -590,6 +590,28 @@ backdrop-filter: blur(10px);
   background: #e33636; 
   color: #fff;
 }
+/* ===== Mini Café ===== */
+.mini-cafe { display:flex; flex-direction:column; gap:12px; align-items:center; }
+.mini-cafe .order { font-weight:700; color:#0c6a3a; background:#eaffea; border:1px solid #c8f5d9; padding:8px 12px; border-radius:12px; }
+.mini-cafe .worktop { display:flex; gap:12px; align-items:flex-end; justify-content:center; }
+.ingredients { display:grid; grid-template-columns:repeat(4,minmax(62px,1fr)); gap:10px; }
+.ingredient { background:#fff; border:1px solid #e3f7ea; border-radius:12px; padding:8px; cursor:pointer; box-shadow:0 2px 8px #0001; transition:transform .12s; font-size:12px; }
+.ingredient:hover { transform:translateY(-1px); }
+.ingredient.used { opacity:.45; pointer-events:none; }
+.ingredient img { width:48px; height:48px; object-fit:cover; border-radius:10px; display:block; margin:0 auto 6px; }
+
+.plate-wrap { position:relative; width:180px; height:120px; }
+.plate { position:absolute; left:0; right:0; bottom:0; margin:auto; width:180px; height:70px; background:radial-gradient(ellipse at center, #fff 60%, #eee 100%); border:1px solid #e5e5e5; border-radius:0 0 80px 80px; box-shadow:0 6px 16px #0002 inset; }
+.on-plate { position:absolute; left:50%; bottom:28px; transform:translateX(-50%); display:flex; gap:6px; flex-wrap:wrap; justify-content:center; width:160px; }
+
+.badge-tip { font-size:12px; color:#3a3a3a; opacity:.8; }
+
+.fly {
+  position:fixed; z-index:3000; width:48px; height:48px; pointer-events:none;
+  transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .45s;
+}
+.success-msg { color:#0d8a54; font-weight:700; margin-top:6px; }
+.err-msg { color:#b00020; font-weight:600; margin-top:6px; }
 
 
 
@@ -679,8 +701,25 @@ backdrop-filter: blur(10px);
 </div>
   <div id="fortuneModal" class="fortune-modal">
   <div class="fortune-modal-content">
-    <button id="closeFortuneModal" class="fortune-close-btn" title="Закрити">✕</button>
-    <h3>Модалочка, робота в процесі:)</h3>
+<button id="closeFortuneModal" class="fortune-close-btn" title="Закрити">✕</button>
+<h3>Міні-кафе: зберіть замовлення</h3>
+
+<div id="miniCafe" class="mini-cafe">
+  <div class="order" id="mcOrder">Замовлення: Гірос класичний</div>
+
+  <div class="worktop">
+    <div class="ingredients" id="mcIngredients"></div>
+    <div class="plate-wrap">
+      <div class="plate"></div>
+      <div class="on-plate" id="mcPlate"></div>
+    </div>
+  </div>
+
+  <div class="badge-tip">Тицяй інгредієнти у правильному порядку 😉</div>
+  <div id="mcMsg"></div>
+  <button id="mcReset" style="margin-top:6px; padding:10px 16px; border:none; border-radius:10px; background:#66bb6a; color:#fff; font-weight:700; cursor:pointer;">Скинути</button>
+</div>
+
 </div>
 
   </div>
@@ -1150,6 +1189,140 @@ fortuneModal.addEventListener('click', e => {
     document.body.style.overflow = "";
   }
 });
+/* ===== Mini Café logic ===== */
+const mcIngredientsEl = document.getElementById('mcIngredients');
+const mcPlateEl = document.getElementById('mcPlate');
+const mcMsgEl = document.getElementById('mcMsg');
+const mcOrderEl = document.getElementById('mcOrder');
+const mcResetBtn = document.getElementById('mcReset');
+
+/** Набір «рецептів» — можна розширювати */
+const RECIPES = [
+  {
+    id: 'gyros',
+    title: 'Гірос класичний',
+    rewardClicks: 50,
+    steps: ['лаваш','мʼясо','овочі','соус'],
+  },
+  {
+    id: 'cheddarPita',
+    title: 'Піта з чедером',
+    rewardClicks: 65,
+    steps: ['піта','сир чедер','овочі','соус'],
+  }
+];
+
+/** Пул інгредієнтів з мінімальними іконками */
+const ALL_ING = [
+  { key:'лаваш', label:'Лаваш', img:'lavash.png' },
+  { key:'мʼясо', label:'Мʼясо', img:'meat.png' },
+  { key:'овочі', label:'Овочі', img:'veggies.png' },
+  { key:'соус', label:'Соус', img:'sauce.png' },
+  { key:'піта', label:'Піта', img:'pita.png' },
+  { key:'сир чедер', label:'Чедер', img:'cheddar.png' },
+];
+
+let currentRecipe = null;
+let progress = 0;
+
+function pickRecipe() {
+  // оберемо випадковий рецепт при кожному відкритті
+  currentRecipe = RECIPES[Math.floor(Math.random()*RECIPES.length)];
+  mcOrderEl.textContent = 'Замовлення: ' + currentRecipe.title;
+  progress = 0;
+  mcMsgEl.innerHTML = '';
+  renderIngredients();
+  mcPlateEl.innerHTML = '';
+}
+
+function renderIngredients() {
+  mcIngredientsEl.innerHTML = '';
+  const poolKeys = new Set([...currentRecipe.steps]); // показуємо потрібні + пару зайвих, щоб було цікавіше
+  // додамо 2 будь-які зайві
+  while (poolKeys.size < currentRecipe.steps.length + 2) {
+    const extra = ALL_ING[Math.floor(Math.random()*ALL_ING.length)].key;
+    poolKeys.add(extra);
+  }
+
+  // зібрати обʼєкти і трохи перемішати
+  const items = Array.from(poolKeys).map(k => ALL_ING.find(i => i.key===k)).filter(Boolean);
+  items.sort(()=>Math.random()-.5);
+
+  for (const ing of items) {
+    const btn = document.createElement('button');
+    btn.className = 'ingredient';
+    btn.dataset.key = ing.key;
+    btn.innerHTML = `<img src="${ing.img}" alt="${ing.label}"><div>${ing.label}</div>`;
+    btn.addEventListener('click', () => onIngredientClick(btn, ing));
+    mcIngredientsEl.appendChild(btn);
+  }
+}
+
+function onIngredientClick(btn, ing) {
+  const needed = currentRecipe.steps[progress];
+  if (ing.key === needed) {
+    btn.classList.add('used');
+    flyToPlate(btn, ing);
+    progress++;
+    mcMsgEl.innerHTML = `<div class="success-msg">Добре! ${progress}/${currentRecipe.steps.length}</div>`;
+    Telegram.WebApp.HapticFeedback.impactOccurred('light');
+
+    if (progress === currentRecipe.steps.length) {
+      onRecipeComplete();
+    }
+  } else {
+    mcMsgEl.innerHTML = `<div class="err-msg">Поспішив 😅. Спочатку: <b>${needed}</b></div>`;
+    Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+  }
+}
+
+function flyToPlate(btn, ing) {
+  const rect = btn.getBoundingClientRect();
+  const plateRect = mcPlateEl.getBoundingClientRect();
+
+  const ghost = document.createElement('img');
+  ghost.src = ALL_ING.find(i=>i.key===ing.key)?.img || '';
+  ghost.className = 'fly';
+  ghost.style.left = rect.left + 'px';
+  ghost.style.top  = rect.top + 'px';
+  document.body.appendChild(ghost);
+
+  requestAnimationFrame(() => {
+    const dx = plateRect.left + plateRect.width/2 - rect.left - 24;
+    const dy = plateRect.top + plateRect.height/2 - rect.top  - 24;
+    ghost.style.transform = `translate(${dx}px, ${dy}px) scale(.6)`;
+    ghost.style.opacity = '0.1';
+  });
+
+  setTimeout(() => {
+    ghost.remove();
+    const chip = document.createElement('img');
+    chip.src = ALL_ING.find(i=>i.key===ing.key)?.img || '';
+    chip.style.width = '36px';
+    chip.style.height = '36px';
+    chip.style.borderRadius = '8px';
+    mcPlateEl.appendChild(chip);
+  }, 460);
+}
+
+async function onRecipeComplete() {
+  const reward = currentRecipe.rewardClicks;
+  clicks += reward;
+  updateDisplay();
+  await saveUserData();
+
+  mcMsgEl.innerHTML = `<div class="success-msg">🎉 Готово! +${reward} кліків за «${currentRecipe.title}»</div>`;
+  Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+}
+
+mcResetBtn.addEventListener('click', () => {
+  pickRecipe();
+});
+
+/** Коли відкривається твоя модалка — стартуємо гру */
+fortuneBtn.addEventListener('click', () => {
+  pickRecipe();
+});
 
   fetchUserData().then(() => {
     setupMarketButtons();
@@ -1162,6 +1335,7 @@ fortuneModal.addEventListener('click', e => {
 </html>
 
   
+
 
 
 
