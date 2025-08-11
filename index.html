@@ -699,6 +699,33 @@ backdrop-filter: blur(10px);
   }
   .ingredient img{ width:44px; height:44px; }
 }
+    .hint-row{
+  display:flex; gap:8px; justify-content:center; align-items:center;
+}
+.hint-toggle{
+  background:transparent; border:1px dashed #c8f5d9; color:#0c6a3a;
+  padding:4px 10px; border-radius:999px; font-size:12px; cursor:pointer;
+}
+.recipe-hint{
+  display:none; gap:6px; flex-wrap:wrap; justify-content:center;
+  padding:6px 8px; background:rgba(202,255,179,.22);
+  border:1px solid #c8f5d9; border-radius:12px; margin-top:6px;
+}
+.recipe-hint.show{ display:flex; }
+.step-chip{
+  display:flex; align-items:center; gap:6px;
+  background:#fff; border:1px solid #e3f7ea; border-radius:10px;
+  padding:4px 8px; font-size:12px;
+}
+.step-chip img{ width:18px; height:18px; border-radius:4px; }
+.step-arrow{ opacity:.55; }
+.ingredient.locked{
+  opacity:.35;
+  pointer-events:none;
+  filter: grayscale(60%);
+  cursor: not-allowed;
+}
+
   </style>
 </head>
 <body>
@@ -790,6 +817,11 @@ backdrop-filter: blur(10px);
 
 <div id="miniCafe" class="mini-cafe">
   <div class="order" id="mcOrder">Замовлення: Гірос класичний</div>
+  <div class="hint-row">
+  <button id="mcHintToggle" class="hint-toggle">Рецепт</button>
+</div>
+<div id="mcRecipeHint" class="recipe-hint"></div>
+
 
   <div class="worktop">
     <div class="ingredients" id="mcIngredients"></div>
@@ -1353,6 +1385,9 @@ function pickRecipe() {
   renderIngredients();
   mcPlateEl.innerHTML = '';
   miniCafeEl.scrollTop = 0;
+  renderRecipeHint();
+mcRecipeHint.classList.remove('show');
+mcHintToggle.textContent = 'Рецепт';
 }
 
 function renderIngredients() {
@@ -1377,8 +1412,22 @@ function renderIngredients() {
     mcIngredientsEl.appendChild(btn);
   }
 }
+function lockNonRecipeIngredients() {
+  const allowed = new Set(currentRecipe.steps);
+  mcIngredientsEl.querySelectorAll('.ingredient').forEach(btn => {
+    if (!allowed.has(btn.dataset.key)) {
+      btn.classList.add('locked');
+      btn.disabled = true; 
+      btn.setAttribute('aria-disabled','true');
+      btn.setAttribute('tabindex','-1');
+    }
+  });
+}
 
 function onIngredientClick(btn, ing) {
+  // якщо рецепт уже зібраний – ігноруємо будь-які кліки
+  if (!currentRecipe || progress >= currentRecipe.steps.length) return;
+
   const needed = currentRecipe.steps[progress];
   if (ing.key === needed) {
     btn.classList.add('used');
@@ -1393,8 +1442,26 @@ function onIngredientClick(btn, ing) {
   } else {
     mcMsgEl.innerHTML = `<div class="err-msg">Поспішив 😅. Спочатку: <b>${needed}</b></div>`;
     Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+    mcRecipeHint.classList.add('show');
+    mcHintToggle.textContent = 'Сховати рецепт';
+    mcRecipeHint.scrollIntoView({ block:'nearest', behavior:'smooth' });
   }
 }
+
+async function onRecipeComplete() {
+  const reward = currentRecipe.rewardClicks;
+  clicks += reward;
+  updateDisplay();
+  await saveUserData();
+
+  mcMsgEl.innerHTML = `<div class="success-msg">🎉 Готово! +${reward} кліків за «${currentRecipe.title}»</div>`;
+  scrollMiniCafeToBottomSafe();
+  Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+
+  // після завершення — заблокуємо все, чого не було в рецепті
+  lockNonRecipeIngredients();
+}
+
 
 function flyToPlate(btn, ing) {
   const rect = btn.getBoundingClientRect();
@@ -1425,17 +1492,6 @@ function flyToPlate(btn, ing) {
   }, 460);
 }
 
-async function onRecipeComplete() {
-  const reward = currentRecipe.rewardClicks;
-  clicks += reward;
-  updateDisplay();
-  await saveUserData();
-
-  mcMsgEl.innerHTML = `<div class="success-msg">🎉 Готово! +${reward} кліків за «${currentRecipe.title}»</div>`;
-  scrollMiniCafeToBottomSafe();
-  Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-}
-
 mcResetBtn.addEventListener('click', () => {
   pickRecipe();
 });
@@ -1444,10 +1500,29 @@ mcCloseBtn.addEventListener('click', () => {
   fortuneModal.style.display = 'none';
   document.body.style.overflow = "";
 });
+  
 /** Коли відкривається твоя модалка — стартуємо гру */
 fortuneBtn.addEventListener('click', () => {
   pickRecipe();
 });
+  const mcHintToggle = document.getElementById('mcHintToggle');
+const mcRecipeHint = document.getElementById('mcRecipeHint');
+
+function renderRecipeHint(){
+  const parts = currentRecipe.steps.map(step=>{
+    const ing = ALL_ING.find(i=>i.key===step);
+    return `<span class="step-chip">${ing?.img ? `<img src="${ing.img}" alt="">` : ''}<span>${ing?.label || step}</span></span>`;
+  });
+  mcRecipeHint.innerHTML = parts.join('<span class="step-arrow">→</span>');
+}
+
+mcHintToggle.addEventListener('click', ()=>{
+  const show = !mcRecipeHint.classList.contains('show');
+  mcRecipeHint.classList.toggle('show', show);
+  mcHintToggle.textContent = show ? 'Сховати рецепт' : 'Рецепт';
+  if (show) mcRecipeHint.scrollIntoView({ block:'nearest', behavior:'smooth' });
+});
+
 
   fetchUserData().then(() => {
     setupMarketButtons();
@@ -1460,6 +1535,7 @@ fortuneBtn.addEventListener('click', () => {
 </html>
 
   
+
 
 
 
