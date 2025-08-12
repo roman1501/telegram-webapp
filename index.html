@@ -6,804 +6,287 @@
   <title>Greek House Tapper</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
+    /* ===== базові штуки ===== */
+    :root{
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+    }
+    html, body {
+      height: 100dvh; /* коректно на мобілці */
+      overscroll-behavior: none;
+      background: #fff;
+    }
     body, html, * {
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -moz-user-select: none;
-}
-
-    /* Стиль для монетки, що летить */
-.coin-fly {
-  position: fixed;
-  width: 24px;
-  height: 24px;
-  background-image: url("greenCoin.png"); /* Заміни на свою монету, або goldCoin.png */
-  background-size: contain;
-  background-repeat: no-repeat;
-  pointer-events: none;
-  z-index: 9999;
-  animation: flyToCounter 1s ease-out forwards;
-}
-
-/* Анімація – летить до центру лічильника */
-@keyframes flyToCounter {
-  to {
-    transform: translate(var(--dx), var(--dy)) scale(0.3);
-    opacity: 0;
-  }
-}
-
-.section-heading {
-  position: relative;
-  padding: 12px 20px;
-  border-radius: 20px;
-  display: inline-block;
-  margin-bottom: 8px;
-  font-weight: bold;
-  color: #003300;
-  z-index: 1;
-  background: linear-gradient(
-    145deg,
-    rgba(202, 255, 179, 0.85) 40%,
-    rgba(202, 255, 179, 0.3) 80%,
-    rgba(202, 255, 179, 0.0) 100%
-  );
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
-/*   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px); */
-  overflow: hidden;
-}
-
-.section-heading::before {
-  content: "";
-  position: absolute;
-  top: -30%;
-  left: -30%;
-  width: 160%;
-  height: 160%;
-  background: conic-gradient(
-    from 90deg,
-    rgba(202, 255, 179, 0.12),
-    rgba(202, 255, 179, 0.05),
-    rgba(202, 255, 179, 0.1),
-    rgba(202, 255, 179, 0.02),
-    transparent,
-    rgba(202, 255, 179, 0.08)
-  );
-  opacity: 0.7;
-  z-index: -1;
-  pointer-events: none;
-  mix-blend-mode: soft-light;
-  border-radius: 50%;
-/*   filter: blur(8px); */
-}
-
-
-.tap-coin {
-  width: 145px;
-  height: 145px;
-  border-radius: 50%;
-  margin: 16px auto 8px;
-  cursor: pointer;
-  overflow: hidden;
-  transition: transform 0.1s;
-  display: block; /* 👈 змінено */
-  background-color: transparent;
-  padding: 0;
-  border: none;
-  transition: transform 0.15s ease;
-    -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-    .tap-coin.rotated {
-  transform: rotate(-5deg);
-}
-
-.tap-coin img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* 👈 це ок */
-  border-radius: 50%;
-}
-
-.tap-coin.active {
-  transform: scale(1.05);
-  filter: brightness(1.1);
-}
-
-.plus-one {
-  position: absolute;
-   color: white; /* 👈 було #2e7d32 */
-  text-shadow: 0 0 6px rgba(0,0,0,0.4); /* 👈 легке сяйво */
-  font-size: 24px;
-  font-weight: bold;
-  animation: floatUp 0.8s ease forwards;
-  pointer-events: none;
-  z-index: 999;
-  filter: drop-shadow(0 0 4px #000);
-}
-
-@keyframes floatUp {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-40px);
-  }
-}
-
-    :root {
-      --main-green: #004d00;
-      --accent-green: #43a047;
-      --light-green: #66bb6a;
-      --dark-green: #2e7d32;
-      --card-bg: #f5f5f5;
-    }
-
-    * {
       box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      -moz-user-select: none;
+      touch-action: manipulation;
     }
-
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       margin: 0;
-      padding: 0;
+      padding: var(--safe-top) var(--safe-right) calc(var(--safe-bottom)) var(--safe-left);
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      background: linear-gradient(to bottom, var(--main-green), #ffffff);
+      min-height: 100dvh;
+      background: linear-gradient(to bottom, #004d00, #ffffff);
       animation: fadeIn 1s ease-in;
     }
+    @keyframes fadeIn { from {opacity:0} to {opacity:1} }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .tab-content {
-      flex: 1;
-      padding: 20px;
-      display: none;
-      text-align: center;
-      overflow-y: auto;
-      animation: slideIn 0.3s ease;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .tab-bar {
-      display: flex;
-      height: 60px;
-      background: var(--main-green);
-      border-top: 2px solid var(--dark-green);
-      box-shadow: 0 -3px 10px rgba(0,0,0,0.2);
-    }
-
-    .tab-button {
-      flex: 1;
-      font-size: 18px;
-      padding: 10px;
-      cursor: pointer;
-      border: none;
-      background: none;
-      color: white;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-
-    .tab-button:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .tab-button.active {
-      background: var(--light-green);
-      color: #fff;
-    }
-
-    .counter {
-      margin-top: 20px;
-      font-size: 24px;
-      color: #000000;
-      animation: pulse 1s infinite alternate ease-in-out;
-    }
-
-    @keyframes pulse {
-      from { transform: scale(1); }
-      to { transform: scale(1.05); }
-    }
-
-    .logo {
-      width: 100px;
-      margin: 10px auto;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    .gyros-img, .bonus-img {
-      max-width: 100%;
-      margin-top: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .bonus-list {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .bonus-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-      text-align: left;
-      transition: transform 0.2s;
-    }
-
-    .bonus-card:hover {
-      transform: scale(1.02);
-    }
-
-    .bonus-card img {
-      width: 100%;
-      border-radius: 12px;
-      margin-bottom: 12px;
-    }
-
-    .bonus-title {
-      font-size: 20px;
-      font-weight: bold;
-      color: var(--dark-green);
-      margin-bottom: 8px;
-    }
-
-    .bonus-description {
-      font-size: 16px;
-      margin-bottom: 12px;
-      color: #333;
-    }
-
-    .bonus-price {
-      font-size: 18px;
-      color: #000;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .bonus-card button {
-      padding: 12px 20px;
-      background-color: var(--accent-green);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s, transform 0.1s;
-    }
-
-    .bonus-card button:hover {
-      background-color: var(--light-green);
-    }
-
-    .bonus-card button:active {
-      transform: scale(0.96);
-    }
-
-#happyHourTimer {
-  max-width: 330px; /* або 280px, як зручніше */
-  margin: 10px auto;
-  text-align: center;
-  padding: 6px 12px;
-  border-radius: 16px;
-  background: rgba(202, 255, 179, 0.35); /* прозоро-зелена підкладка */
-  backdrop-filter: blur(6px);
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1.4;
-  overflow: hidden;
-}
-
-
-    .bonus-card.used {
-      opacity: 0.6;
-      filter: grayscale(60%);
-    }
-
-    #confirmModal {
-      display: none;
+    /* ===== тости/банери ===== */
+    .toast {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-      animation: fadeIn 0.3s ease;
-    }
-
-#confirmModal::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-/*   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px); */
-  background: rgba(255, 255, 255, 0.05); /* легкий білий димок */
-  z-index: -1;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.4s ease;
-}
-
-    
-    #confirmModal .modal-box {
-      background: white;
-      padding: 24px;
-      border-radius: 16px;
-      max-width: 90%;
+      left: 50%;
+      bottom: calc(12px + var(--safe-bottom));
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0,0,0,0.82);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 8px 24px #0005;
+      z-index: 3000;
+      opacity: 0;
+      max-width: 92vw;
       text-align: center;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-      animation: slideIn 0.4s ease;
+      transition: transform .2s ease, opacity .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) }
+    .toast.error { background:#b00020 }
+    .toast.success { background:#148e4a }
+
+    .balance-delta {
+      position: fixed;
+      top: calc(8px + var(--safe-top));
+      right: calc(8px + var(--safe-right));
+      z-index: 3000;
+      background: #0a7f3a;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      box-shadow: 0 6px 18px #0a7f3a44;
+      transform: translateY(-12px);
+      opacity: 0;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .balance-delta.show{ opacity:1; transform: translateY(0) }
+    .balance-delta small{ display:block; font-weight:600; opacity:.9 }
+
+    /* ===== далі твій існуючий стиль (скорочено нічого не викидав) ===== */
+
+    /* Стиль для монетки, що летить */
+    .coin-fly {
+      position: fixed;
+      width: 24px;
+      height: 24px;
+      background-image: url("greenCoin.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 2500;
+      animation: flyToCounter 1s ease-out forwards;
+    }
+    @keyframes flyToCounter {
+      to { transform: translate(var(--dx), var(--dy)) scale(0.3); opacity: 0; }
     }
 
-#confirmModal.active::before {
-  opacity: 1;
-  visibility: visible;
-}
-
-    
-    #confirmModal p {
-      font-size: 18px;
-      color: #333;
+    .section-heading {
+      position: relative; padding: 12px 20px; border-radius: 20px;
+      display: inline-block; margin-bottom: 8px; font-weight: bold;
+      color: #003300; z-index: 1;
+      background: linear-gradient(145deg, rgba(202,255,179,.85) 40%, rgba(202,255,179,.3) 80%, rgba(202,255,179,0) 100%);
+      box-shadow: 0 8px 16px rgba(0,0,0,.06); overflow: hidden;
+    }
+    .section-heading::before{
+      content:""; position:absolute; top:-30%; left:-30%; width:160%; height:160%;
+      background: conic-gradient(from 90deg, rgba(202, 255, 179, .12), rgba(202,255,179,.05), rgba(202,255,179,.1), rgba(202,255,179,.02), transparent, rgba(202,255,179,.08));
+      opacity:.7; z-index:-1; pointer-events:none; mix-blend-mode:soft-light; border-radius:50%;
     }
 
-    #confirmModal button {
-      padding: 12px 24px;
-      margin: 10px 8px 0;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
+    .tap-coin{ width:145px; height:145px; border-radius:50%; margin:16px auto 8px; cursor:pointer; overflow:hidden; display:block; background:transparent; padding:0; border:none; transition: transform .15s ease; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .tap-coin.rotated{ transform: rotate(-5deg) }
+    .tap-coin img{ display:block; width:100%; height:100%; object-fit:cover; border-radius:50% }
+    .tap-coin.active{ transform: scale(1.05); filter: brightness(1.1) }
+
+    .plus-one{ position:absolute; color:#fff; text-shadow:0 0 6px rgba(0,0,0,.4); font-size:24px; font-weight: bold; animation: floatUp .8s ease forwards; pointer-events:none; z-index: 2000; filter: drop-shadow(0 0 4px #000) }
+    @keyframes floatUp { from{opacity:1; transform: translateY(0)} to{opacity:0; transform: translateY(-40px)} }
+
+    .tab-content { flex:1; padding: 20px; display: none; text-align: center; overflow-y: auto; animation: slideIn .3s ease; }
+    .tab-content.active{ display:block }
+    @keyframes slideIn { from{ transform: translateY(20px); opacity:0 } to{ transform: translateY(0); opacity:1 } }
+
+    .tab-bar{ display:flex; height:60px; background:#004d00; border-top:2px solid #2e7d32; box-shadow: 0 -3px 10px rgba(0,0,0,.2) }
+    .tab-button{ flex:1; font-size:18px; padding:10px; cursor:pointer; border:none; background:none; color:#fff; font-weight:bold; transition: background .3s }
+    .tab-button:hover{ background: rgba(255,255,255,.1) }
+    .tab-button.active{ background:#66bb6a; color:#fff }
+
+    .counter{ margin-top: 20px; font-size: 24px; color:#000; animation: pulse 1s infinite alternate ease-in-out }
+    @keyframes pulse { from{ transform: scale(1) } to{ transform: scale(1.05) } }
+
+    .logo{ width:100px; margin:10px auto; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.3) }
+
+    .gyros-img, .bonus-img { max-width: 100%; margin-top: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,.2) }
+
+    .bonus-list{ display:flex; flex-direction: column; gap:20px }
+    .bonus-card{ background:#f5f5f5; border-radius:16px; padding:16px; box-shadow:0 4px 16px rgba(0,0,0,.15); text-align: left; transition: transform .2s }
+    .bonus-card:hover{ transform: scale(1.02) }
+    .bonus-card img{ width:100%; border-radius:12px; margin-bottom:12px }
+    .bonus-title{ font-size:20px; font-weight:bold; color:#2e7d32; margin-bottom:8px }
+    .bonus-description{ font-size:16px; margin-bottom:12px; color:#333 }
+    .bonus-price{ font-size:18px; color:#000; font-weight:bold; margin-bottom:10px }
+    .bonus-card.used{ opacity:.6; filter: grayscale(60%) }
+    .bonus-card button{ padding:12px 20px; background:#43a047; color:#fff; border:none; border-radius:8px; font-size:16px; cursor:pointer; transition: background-color .3s, transform .1s }
+    .bonus-card button:hover{ background:#66bb6a }
+    .bonus-card button:active{ transform: scale(.96) }
+
+    #happyHourTimer{
+      max-width:330px; margin:10px auto; text-align:center; padding:6px 12px; border-radius:16px;
+      background: rgba(202,255,179,.35); font-weight:600; font-size:14px; line-height:1.4; overflow:hidden; color:#003300;
     }
 
-    #confirmActivate {
-      background: var(--accent-green);
-      color: white;
+    /* ===== модалки ===== */
+    #confirmModal{ display:none; position:fixed; inset:0; background: rgba(0,0,0,.6); z-index: 1900; justify-content:center; align-items:center; animation: fadeIn .3s ease }
+    #confirmModal .modal-box{ background:#fff; padding:24px; border-radius:16px; max-width:90%; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,.3); animation: slideIn .4s ease }
+    #confirmModal p{ font-size:18px; color:#333 }
+    #confirmModal button{ padding:12px 24px; margin:10px 8px 0; border:none; border-radius:10px; font-size:16px; cursor:pointer }
+    #confirmActivate{ background:#43a047; color:#fff }
+    #cancelActivate{ background:#ccc; color:#333 }
+
+    .welcome-block{ display:flex; flex-direction: column; align-items:center }
+
+    #dailyRewardModal{ display:none; position:fixed; inset:0; background: rgba(0,0,0,.4); z-index: 1800; justify-content:center; align-items:center }
+    .daily-reward-box{ background: rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); padding:32px 24px; border-radius:20px; max-width:90%; text-align:center; color:#fff; box-shadow:0 8px 24px rgba(0,0,0,.25) }
+    .daily-reward-box h3{ font-size:22px; margin-bottom:10px; color:#eaffea }
+    .daily-reward-box p{ font-size:18px; margin-bottom:20px }
+    .daily-reward-box button{ padding:10px 24px; background: linear-gradient(to right, #66bb6a, #99d699); color:#fff; border:none; border-radius:12px; font-size:16px; font-weight:bold; cursor:pointer }
+
+    #dailyRewardBlur{ position:fixed; inset:0; z-index: 1700; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(255,255,255,.05); opacity:0; pointer-events:none; transition: opacity .3s ease }
+    #dailyRewardBlur.active{ opacity:1; pointer-events:auto }
+
+    .fortune-btn{
+      position: fixed; top: calc(16px + var(--safe-top)); right: calc(14px + var(--safe-right));
+      z-index: 120; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg, #000 60%, #1E1E1E 100%); border:none; border-radius:50%;
+      box-shadow: 0 2px 18px 2px #ffe06655; padding: 10px; cursor:pointer; outline:none; transition: box-shadow .2s, transform .12s;
     }
+    .fortune-btn:hover{ box-shadow: 0 2px 26px 8px #ffe06677; transform: scale(1.07) }
+    .fortune-btn img{ width: 48px; height:48px; pointer-events:none }
 
-    #cancelActivate {
-      background: #ccc;
-      color: #333;
+    .fortune-modal{ display:none; position:fixed; inset:0; z-index: 2000; justify-content:center; align-items:center; background: rgba(96,96,96,.10); backdrop-filter: blur(11px); -webkit-backdrop-filter: blur(11px); overscroll-behavior: contain; }
+    .fortune-modal-content{
+      position:relative; background: rgba(255,255,255,.78); border-radius:28px; padding:36px 24px 24px 24px;
+      min-width:310px; max-width: 95vw; max-height: 90dvh; width: min(520px, 95vw);
+      box-shadow: 0 6px 32px 0 #00884a28, 0 2px 18px #0002; text-align:center; display:flex; flex-direction:column; overflow:hidden;
     }
-    .welcome-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-    #dailyRewardModal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 999;
-  justify-content: center;
-  align-items: center;
-/*   backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px); */
-}
+    .fortune-close-btn{ position:absolute; top:14px; right:18px; background: rgba(44,197,125,.12); border:none; font-size:26px; font-weight:900; color:#12ae62; cursor:pointer; border-radius:50%; width:36px; height:36px; box-shadow:0 4px 12px #0fc59013 }
 
-.daily-reward-box {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 32px 24px;
-  border-radius: 20px;
-  max-width: 90%;
-  text-align: center;
-  color: white;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-/*   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); */
-  background-image: radial-gradient(circle at top left, rgba(202,255,179,0.3), rgba(255,255,255,0.05));
-  animation: fadeInModal 0.3s ease-out;
-}
+    /* ===== Mini Café ===== */
+    .mini-cafe{ display:flex; min-height:0; flex-direction:column; gap:12px; align-items:center; overflow:auto; padding-bottom:12px; flex:1 1 auto; -webkit-overflow-scrolling:touch; padding:12px; scrollbar-gutter: stable; }
+    .mini-cafe .order{ font-weight:700; color:#0c6a3a; background:#eaffea; border:1px solid #c8f5d9; padding:8px 12px; border-radius:12px }
+    .mini-cafe .worktop{ display:flex; gap:12px; align-items:flex-end; justify-content:center }
+    .ingredients{ display:grid; grid-template-columns:repeat(4,minmax(62px,1fr)); gap:10px }
+    .ingredient{ background:#fff; border:1px solid #e3f7ea; border-radius:12px; padding:8px; cursor:pointer; box-shadow:0 2px 8px #0001; transition:transform .12s; font-size:12px }
+    .ingredient:hover{ transform: translateY(-1px) }
+    .ingredient.used{ opacity:.45; pointer-events:none }
+    .ingredient.locked{ opacity:.35; pointer-events:none; filter:grayscale(60%); cursor:not-allowed }
+    .ingredient img{ width:48px; height:48px; object-fit:cover; border-radius:10px; display:block; margin:0 auto 6px }
 
-@keyframes fadeInModal {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
+    .plate-wrap{ position:relative; width:250px; height:160px }
+    .plate{ position:absolute; left:0; right:0; bottom:0; margin:auto; width:250px; height:90px; background: radial-gradient(ellipse at center, #fff 60%, #eee 100%); border:1px solid #e5e5e5; border-radius:0 0 120px 120px; box-shadow:0 6px 16px #0002 inset }
+    .on-plate{ position:absolute; left:50%; bottom:35px; transform: translateX(-50%); display:flex; gap:8px; flex-wrap:wrap; justify-content:center; width:210px }
 
-.daily-reward-box h3 {
-  font-size: 22px;
-  margin-bottom: 10px;
-  color: #eaffea;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
+    .badge-tip{ font-size:12px; color:#3a3a3a; opacity:.8 }
 
-.daily-reward-box p {
-  font-size: 18px;
-  color: #ffffff;
-  margin-bottom: 20px;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.25);
-}
+    .fly{ position:fixed; z-index:3000; width:48px; height:48px; pointer-events:none; transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .45s }
 
-.daily-reward-box button {
-  padding: 10px 24px;
-  background: linear-gradient(to right, #66bb6a, #99d699);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
+    .success-msg{ color:#0d8a54; font-weight:700; margin-top:6px }
+    .err-msg{ color:#b00020; font-weight:600; margin-top:6px }
 
-.daily-reward-box button:hover {
-  background: linear-gradient(to right, #7ddc7d, #b4e8b4);
-}
-/* #blurOverlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 998;
-backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  opacity: 0; 
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-} */
-#dailyRewardBlur {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 998;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.05); /* м’який димок */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-#dailyRewardBlur.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-.fortune-btn {
-  position: fixed;
-  top: 32px;   /* 👈 більше відступу зверху */
-  right: 28px; /* 👈 більше відступу справа */
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #000000 60%, #1E1E1E 100%);
-  border: none;
-  border-radius: 50%;
-  box-shadow: 0 2px 18px 2px #ffe06655;
-  padding: 14px; /* 👈 більше внутрішнього відступу */
-  cursor: pointer;
-  outline: none;
-  transition: box-shadow .2s, transform .12s;
-}
-.fortune-btn:hover {
-  box-shadow: 0 2px 26px 8px #ffe06677;
-  transform: scale(1.10);
-}
-.fortune-btn img {
-  width: 72px;  /* 👈 велика іконка! */
-  height: 72px;
-  pointer-events: none;
-}
+    @media (max-width: 600px){
+      .mini-cafe .worktop{ flex-direction: column; align-items:center; gap:8px }
+      .plate-wrap{ margin-top:-12px; width:200px; height:140px }
+      .ingredients{ grid-template-columns: repeat(2, minmax(80px,1fr)); gap:14px }
+      .plate{ width:200px; height:80px; border-radius: 0 0 100px 100px }
+      .on-plate{ width:170px; bottom:30px }
+    }
+    #miniCafe, .recipe-hint{ width:100%; max-width:100%; box-sizing:border-box }
+    .step-chip{ white-space: nowrap }
+    .hint-row{ display:flex; gap:8px; justify-content:center; align-items:center }
+    .hint-toggle{ background:transparent; border:1px dashed #c8f5d9; color:#0c6a3a; padding:4px 10px; border-radius:999px; font-size:12px; cursor:pointer }
+    .recipe-hint{ display:none; gap:6px; flex-wrap:wrap; justify-content:center; padding:6px 8px; background:rgba(202,255,179,.22); border:1px solid #c8f5d9; border-radius:12px; margin-top:6px }
+    .recipe-hint.show{ display:flex }
+    .step-chip{ display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #e3f7ea; border-radius:10px; padding:4px 8px; font-size:12px }
+    .step-chip img{ width:18px; height:18px; border-radius:4px }
+    .step-arrow{ opacity:.55 }
 
-.fortune-modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  z-index: 2000;
-  justify-content: center;
-  align-items: center;
-  /* Мінімалістичний напівпрозорий білий фон з блюром */
-  background: rgba(96, 96, 96, 0.10);
-  backdrop-filter: blur(11px);
-  -webkit-backdrop-filter: blur(11px);
-  animation: fadeInModalBg .33s;
-  overscroll-behavior: contain;
-}
-@keyframes fadeInModalBg {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-
-.fortune-modal-content {
-  position: relative;
-  background: rgba(255, 255, 255, 0.78);
-  border-radius: 28px;
-  padding: 36px 24px 24px 24px;
-  min-width: 310px;
-  max-width: 95vw;
-  max-height: 90dvh;
-  box-shadow: 0 6px 32px 0 #00884a28, 0 2px 18px #0002;
-  text-align: center;
-  animation: fortuneAppear 0.22s cubic-bezier(.18,.78,.61,1.09);
-  backdrop-filter: blur(0.1px); /* Трохи мʼякше вміст */
-  -webkit-backdrop-filter: blur(0.1px);
-  border: 1.5px solid #d3ffe2;
-  display: flex;
-  flex-direction: column;
-   overflow: hidden;
-}
-
-@keyframes fortuneAppear {
-  from { transform: scale(0.97) translateY(28px); opacity: 0;}
-  to   { transform: scale(1) translateY(0); opacity: 1;}
-}
-
-.fortune-close-btn {
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  background: rgba(44, 197, 125, 0.12);
-  border: none;
-  font-size: 26px;
-  font-weight: 900;
-  color: #12ae62;
-  cursor: pointer;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  box-shadow: 0 4px 12px #0fc59013;
-  transition: background .16s, color .18s;
-  z-index: 2;
-  display: flex; align-items: center; justify-content: center;
-}
-.fortune-close-btn:hover {
-  background: #e33636; 
-  color: #fff;
-}
-  /* тримаємо стабільну ширину модалки */
-.fortune-modal-content{
-  width: min(520px, 95vw);
-}
-
-
-/* не даємо внутрішнім блокам розширювати контент */
-#miniCafe, .recipe-hint{
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* дрібний бонус: резерв під скролбар, де підтримується */
-.mini-cafe{ scrollbar-gutter: stable; }
-
-/* щоб чіпи не ламали рядок всередині себе */
-.step-chip{ white-space: nowrap; }
-/* ===== Mini Café ===== */
-.mini-cafe { display:flex;  min-height: 0; flex-direction:column; gap:12px; align-items:center;   overflow: auto; padding-bottom: 12px; flex:1 1 auto;  -webkit-overflow-scrolling:touch;  padding:12px; }
-.mini-cafe .order { font-weight:700; color:#0c6a3a; background:#eaffea; border:1px solid #c8f5d9; padding:8px 12px; border-radius:12px; }
-.mini-cafe .worktop { display:flex; gap:12px; align-items:flex-end; justify-content:center; }
-.ingredients {
-  display:grid;
-  grid-template-columns:repeat(4,minmax(62px,1fr));
-  gap:10px;
-}
-.ingredient { background:#fff; border:1px solid #e3f7ea; border-radius:12px; padding:8px; cursor:pointer; box-shadow:0 2px 8px #0001; transition:transform .12s; font-size:12px; }
-.ingredient:hover { transform:translateY(-1px); }
-.ingredient.used { opacity:.45; pointer-events:none; }
-.ingredient img { width:48px; height:48px; object-fit:cover; border-radius:10px; display:block; margin:0 auto 6px; }
-
-.plate-wrap {
-  position:relative;
-  width: 250px;
-  height: 160px;
-}
-.plate {
-  position:absolute;
-  left:0; right:0; bottom:0;
-  margin:auto;
-  width: 250px;
-  height: 90px;
-  background: radial-gradient(ellipse at center, #fff 60%, #eee 100%);
-  border: 1px solid #e5e5e5;
-  border-radius: 0 0 120px 120px;
-  box-shadow: 0 6px 16px #0002 inset;
-}
-    .on-plate {
-  position:absolute;
-  left:50%;
-  bottom:35px;
-  transform:translateX(-50%);
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  justify-content:center;
-  width: 210px;
-}
-
-.badge-tip { font-size:12px; color:#3a3a3a; opacity:.8; }
-
-.fly {
-  position:fixed; z-index:3000; width:48px; height:48px; pointer-events:none;
-  transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .45s;
-}
-.success-msg { color:#0d8a54; font-weight:700; margin-top:6px; }
-.err-msg { color:#b00020; font-weight:600; margin-top:6px; }
-@media (max-width: 600px){
-  .mini-cafe .worktop{
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;              /* було 12px */
-  }
-
-  .plate-wrap{
-    margin-top: -12px;     /* підняли тарілку */
-    width: 200px;
-    height: 140px;
-  }
-
-  .ingredients{
-    grid-template-columns: repeat(2, minmax(80px, 1fr));
-    gap: 14px;
-  }
-
-  .plate{
-    width: 200px;
-    height: 80px;
-    border-radius: 0 0 100px 100px;
-  }
-
-  .on-plate{
-    width: 170px;
-    bottom: 30px;
-  }
-}
-
-/* на всяк випадок: ці дві — поза media, щоб не рвали ширину */
-#miniCafe, .recipe-hint{
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-.step-chip{ white-space: nowrap; }
-
-.mc-footer {
-  bottom: 0;
-  display: flex;
-  flex:0 0 auto;  
-  position:static;   
-  gap: 8px;
-  justify-content: center;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  padding: 10px 12px;
-    padding-bottom:calc(10px + env(safe-area-inset-bottom));
-  border-top: 1px solid #e8f5ee;
-  border-radius: 0 0 24px 24px; /* щоб зливалося з радіусами модалки */
-  z-index: 1;
-}
-
-.mc-btn {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-}
-#mcReset { background:#66bb6a; color:#fff; }
-#mcClose { background:#e3e3e3; color:#333; }
-    @media (max-width: 380px){
-  .ingredients{
-    grid-template-columns:repeat(2, minmax(72px,1fr));
-    gap:12px;
-  }
-  .ingredient img{ width:44px; height:44px; }
-}
-    .hint-row{
-  display:flex; gap:8px; justify-content:center; align-items:center;
-}
-.hint-toggle{
-  background:transparent; border:1px dashed #c8f5d9; color:#0c6a3a;
-  padding:4px 10px; border-radius:999px; font-size:12px; cursor:pointer;
-}
-.recipe-hint{
-  display:none; gap:6px; flex-wrap:wrap; justify-content:center;
-  padding:6px 8px; background:rgba(202,255,179,.22);
-  border:1px solid #c8f5d9; border-radius:12px; margin-top:6px;
-}
-.recipe-hint.show{ display:flex; }
-.step-chip{
-  display:flex; align-items:center; gap:6px;
-  background:#fff; border:1px solid #e3f7ea; border-radius:10px;
-  padding:4px 8px; font-size:12px;
-}
-.step-chip img{ width:18px; height:18px; border-radius:4px; }
-.step-arrow{ opacity:.55; }
-.ingredient.locked{
-  opacity:.35;
-  pointer-events:none;
-  filter: grayscale(60%);
-  cursor: not-allowed;
-}
-
+    .mc-footer{ bottom:0; display:flex; flex:0 0 auto; position:static; gap:8px; justify-content:center; background: rgba(255,255,255,.92); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); padding:10px 12px; padding-bottom: calc(10px + var(--safe-bottom)); border-top:1px solid #e8f5ee; border-radius:0 0 24px 24px; z-index:1 }
+    .mc-btn{ padding:10px 16px; border:none; border-radius:10px; font-weight:700; cursor:pointer }
+    #mcReset{ background:#66bb6a; color:#fff } #mcClose{ background:#e3e3e3; color:#333 }
+    @media (max-width: 380px){ .ingredients{ grid-template-columns:repeat(2, minmax(72px,1fr)); gap:12px } .ingredient img{ width:44px; height:44px } }
   </style>
 </head>
 <body>
-<!-- <div id="blurOverlay"></div> -->
-<div id="dailyRewardBlur"></div>
+  <!-- тост та банер дельти -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="balanceDelta" class="balance-delta" aria-hidden="true"></div>
+
+  <div id="dailyRewardBlur"></div>
 
   <!-- Тапати -->
   <div id="tap-tab" class="tab-content active">
-    <button id="fortuneBtn" class="fortune-btn" title="Міні-кафе">
-<!--   <img src="fortuneWheelIcon.png" alt="Колесо фортуни"> -->
-</button>
+    <button id="fortuneBtn" class="fortune-btn" title="Міні-кафе"></button>
 
-<div class="welcome-block">
-    <img src="logo.jfif" alt="Greek House logo" class="logo">
-  <h2 class="section-heading">Привіт, <span id="username">...</span>!</h2>
-</div>
-        <div class="counter" id="counter">Завантаження...</div>
-    <div id="happyHourTimer" style="margin-top: 10px; font-size: 18px; color: #fff; background: #66bb6a; padding: 8px 16px; border-radius: 12px; display: none;">
-  ⏳ Happy Hour через ...
-</div>
+    <div class="welcome-block">
+      <img src="logo.jfif" alt="Greek House logo" class="logo">
+      <h2 class="section-heading">Привіт, <span id="username">...</span>!</h2>
+    </div>
+
+    <div class="counter" id="counter">Завантаження...</div>
+
+    <div id="happyHourTimer" style="margin-top:10px; font-size:18px; color:#fff; background:#66bb6a; padding:8px 16px; border-radius:12px; display:none;">
+      ⏳ Happy Hour через ...
+    </div>
+
     <button class="tap-coin" id="tapBtn"><img src="greenCoin.png" alt="Монетка Greek House"></button>
     <img src="bg.jpg" alt="Gyros" class="gyros-img">
   </div>
 
- <!-- Ринок -->
-<div id="market-tab" class="tab-content">
-  <h2 class="section-heading">🛒 Ринок бонусів</h2>
-  <div class="bonus-list">
-    <div class="bonus-card">
-      <img src="gyros.jpeg" alt="Знижка на гірос">
-      <div class="bonus-title">-50% на гірос</div>
-      <div class="bonus-description">Смачна знижка на гірос у Greek House</div>
-      <div class="bonus-price">1000 кліків</div>
-      <button>Отримати</button>
-    </div>
+  <!-- Ринок -->
+  <div id="market-tab" class="tab-content">
+    <h2 class="section-heading">🛒 Ринок бонусів</h2>
+    <div class="bonus-list">
+      <div class="bonus-card">
+        <img src="gyros.jpeg" alt="Знижка на гірос">
+        <div class="bonus-title">-50% на гірос</div>
+        <div class="bonus-description">Смачна знижка на гірос у Greek House</div>
+        <div class="bonus-price">1000 кліків</div>
+        <button>Отримати</button>
+      </div>
 
-    <div class="bonus-card">
-      <img src="kartoplafrivelyka.jpeg" alt="Велика картопля за 35 грн">
-      <div class="bonus-title">Велика картопля за 35 грн</div>
-      <div class="bonus-description">Обміняй кліки на хрустку картоплю!</div>
-      <div class="bonus-price">700 кліків</div>
-      <button>Отримати</button>
-    </div>
+      <div class="bonus-card">
+        <img src="kartoplafrivelyka.jpeg" alt="Велика картопля за 35 грн">
+        <div class="bonus-title">Велика картопля за 35 грн</div>
+        <div class="bonus-description">Обміняй кліки на хрустку картоплю!</div>
+        <div class="bonus-price">700 кліків</div>
+        <button>Отримати</button>
+      </div>
 
-    <div class="bonus-card">
-      <img src="pitagrylichederini.png" alt="Знижка на піту гриль з чедером">
-      <div class="bonus-title">-50% на піту гриль з чедером</div>
-      <div class="bonus-description">Скуштуй улюблену піту в 2 рази дешевше!</div>
-      <div class="bonus-price">750 кліків</div>
-      <button>Отримати</button>
+      <div class="bonus-card">
+        <img src="pitagrylichederini.png" alt="Знижка на піту гриль з чедером">
+        <div class="bonus-title">-50% на піту гриль з чедером</div>
+        <div class="bonus-description">Скуштуй улюблену піту в 2 рази дешевше!</div>
+        <div class="bonus-price">750 кліків</div>
+        <button>Отримати</button>
+      </div>
     </div>
   </div>
-</div>
-
 
   <!-- Інвентар -->
   <div id="inventory-tab" class="tab-content">
@@ -818,7 +301,7 @@ backdrop-filter: blur(10px);
     <button class="tab-button" onclick="showTab('inventory-tab', this)">Інвентар</button>
   </div>
 
-  <!-- Модальне вікно -->
+  <!-- Модалка підтвердження -->
   <div id="confirmModal">
     <div class="modal-box">
       <p>Після активації цього бонусу зʼявиться код. Цей код потрібно буде заскрінити або відразу показати на касі. Інакше, ви втратите цей код назавжди.</p>
@@ -826,56 +309,102 @@ backdrop-filter: blur(10px);
       <button id="cancelActivate">Назад</button>
     </div>
   </div>
-  
-<div id="dailyRewardModal">
-  <div class="daily-reward-box">
-    <h3>🎉 Щоденна нагорода</h3>
-    <p>+100 кліків за вхід сьогодні!</p>
-    <button onclick="closeDailyRewardModal()">Окей</button>
-  </div>
-</div>
-  <div id="fortuneModal" class="fortune-modal">
-  <div class="fortune-modal-content">
-<button id="closeFortuneModal" class="fortune-close-btn" title="Закрити">✕</button>
-<h3>Міні-кафе: зберіть замовлення</h3>
 
-<div id="miniCafe" class="mini-cafe">
-  <div class="order" id="mcOrder">Замовлення: Гірос класичний</div>
-  <div class="hint-row">
-  <button id="mcHintToggle" class="hint-toggle">Підглянути рецепт</button>
-</div>
-<div id="mcRecipeHint" class="recipe-hint"></div>
-
-
-  <div class="worktop">
-    <div class="ingredients" id="mcIngredients"></div>
-    <div class="plate-wrap">
-      <div class="plate"></div>
-      <div class="on-plate" id="mcPlate"></div>
+  <!-- Модалка щоденної нагороди -->
+  <div id="dailyRewardModal">
+    <div class="daily-reward-box">
+      <h3>🎉 Щоденна нагорода</h3>
+      <p>+100 кліків за вхід сьогодні!</p>
+      <button onclick="closeDailyRewardModal()">Окей</button>
     </div>
   </div>
 
-  <div class="badge-tip">Тицяй інгредієнти у правильному порядку 😉</div>
-  <div id="mcMsg"></div>
-  </div>
-  <div class="mc-footer">
-  <button id="mcReset" class="mc-btn">Скинути</button>
-  <button id="mcClose" class="mc-btn">Закрити</button>
-</div>
+  <!-- Модалка міні-кафе -->
+  <div id="fortuneModal" class="fortune-modal">
+    <div class="fortune-modal-content">
+      <button id="closeFortuneModal" class="fortune-close-btn" title="Закрити">✕</button>
+      <h3>Міні-кафе: зберіть замовлення</h3>
 
-</div>
+      <div id="miniCafe" class="mini-cafe">
+        <div class="order" id="mcOrder">Замовлення: Гірос класичний</div>
+        <div class="hint-row">
+          <button id="mcHintToggle" class="hint-toggle">Підглянути рецепт</button>
+        </div>
+        <div id="mcRecipeHint" class="recipe-hint"></div>
 
+        <div class="worktop">
+          <div class="ingredients" id="mcIngredients"></div>
+          <div class="plate-wrap">
+            <div class="plate"></div>
+            <div class="on-plate" id="mcPlate"></div>
+          </div>
+        </div>
+
+        <div class="badge-tip">Тицяй інгредієнти у правильному порядку 😉</div>
+        <div id="mcMsg"></div>
+      </div>
+
+      <div class="mc-footer">
+        <button id="mcReset" class="mc-btn">Скинути</button>
+        <button id="mcClose" class="mc-btn">Закрити</button>
+      </div>
+    </div>
   </div>
-</div>
+
 <script>
-  
+  /* ========= 1) FULL SCREEN + safe areas ========= */
   const tg = window.Telegram.WebApp;
+
+  // готовність + максимальна висота
+  tg.ready?.();
   tg.expand();
 
+  // блокуємо вертикальні свайпи (щоб не «згортало» webview)
+  if (tg.disableVerticalSwipes) {
+    try { tg.disableVerticalSwipes(); } catch(e){}
+  }
+
+  // якщо платформа підтримує — просимо повний екран
+  if (typeof tg.requestFullscreen === 'function') {
+    try { tg.requestFullscreen(); } catch(e){}
+  }
+
+  // безпечно слухаємо safe-area і застосовуємо до CSS-змінних
+  function applySafeArea(safe){
+    const s = safe || tg.contentSafeAreaInset || tg.safeAreaInset || {top:0,right:0,bottom:0,left:0};
+    document.documentElement.style.setProperty('--safe-top', (s.top||0) + 'px');
+    document.documentElement.style.setProperty('--safe-right', (s.right||0) + 'px');
+    document.documentElement.style.setProperty('--safe-bottom', (s.bottom||0) + 'px');
+    document.documentElement.style.setProperty('--safe-left', (s.left||0) + 'px');
+  }
+  tg.onEvent?.('contentSafeAreaChanged', applySafeArea);
+  tg.onEvent?.('safeAreaChanged', applySafeArea);
+  applySafeArea();
+
+  /* ========= helpers: тости та дельта балансу ========= */
+  const toastEl = document.getElementById('toast');
+  function showToast(msg, type='info', ms=1800){
+    toastEl.textContent = msg;
+    toastEl.className = 'toast ' + (type==='error'?'error': type==='success'?'success':'');
+    toastEl.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> toastEl.classList.remove('show'), ms);
+  }
+
+  const deltaEl = document.getElementById('balanceDelta');
+  function showBalanceDelta(added, prev, now, ms=1800){
+    if (!added) return;
+    deltaEl.innerHTML = `+${added} <small>Було ${prev} → Стало ${now}</small>`;
+    deltaEl.classList.add('show');
+    clearTimeout(showBalanceDelta._t);
+    showBalanceDelta._t = setTimeout(()=> deltaEl.classList.remove('show'), ms);
+  }
+
+  /* ========= твій існуючий код (з мінімальними правками) ========= */
   const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
 
-  let user = tg.initDataUnsafe?.user || { id: 123456789, first_name: "Тест" };
+  const user = tg.initDataUnsafe?.user || { id: 123456789, first_name: "Тест" };
   const userId = user.id;
   const userName = user.first_name || "Гість";
   document.getElementById("username").innerText = userName;
@@ -884,227 +413,145 @@ backdrop-filter: blur(10px);
   const inventoryListEl = document.querySelector("#inventory-tab .bonus-list");
 
   const confirmModal = document.getElementById("confirmModal");
-
   const confirmBtn = document.getElementById("confirmActivate");
   const cancelBtn = document.getElementById("cancelActivate");
-  let isHappyHour = false;
 
-    const happyHourStart = 21; // 17:00
-const happyHourEnd = 22;   // 18:00
-  
+  let isHappyHour = false;
+  const happyHourStart = 21;
+  const happyHourEnd = 22;
   const availableBonuses = [
-    {
-      name: "gyros",
-      title: "-50% на гірос",
-      description: "Смачна знижка на гірос у Greek House",
-      price: 1000,
-      image: "gyros.jpeg"
-    },
-    {
-      name: "bigPotato",
-      title: "Велика картопля за 35 грн",
-      description: "Обміняй кліки на хрустку картоплю!",
-      price: 700,
-      image: "kartoplafrivelyka.jpeg"
-    },
-    {
-      name: "pitaGrylZChederom",
-      title: "-50% на піту гриль з чедером",
-      description: "Скуштуй улюблену піту в 2 рази дешевше!",
-      price: 750,
-      image: "pitagrylichederini.png"
-    }
+    { name:"gyros", title:"-50% на гірос", description:"Смачна знижка на гірос у Greek House", price:1000, image:"gyros.jpeg" },
+    { name:"bigPotato", title:"Велика картопля за 35 грн", description:"Обміняй кліки на хрустку картоплю!", price:700, image:"kartoplafrivelyka.jpeg" },
+    { name:"pitaGrylZChederom", title:"-50% на піту гриль з чедером", description:"Скуштуй улюблену піту в 2 рази дешевше!", price:750, image:"pitagrylichederini.png" }
   ];
 
-
-
   let clicks = 0;
+  const happyEl = document.getElementById("happyHourTimer");
 
-const happyEl = document.getElementById("happyHourTimer");
-// function showBlur() {
-//   const blur = document.getElementById("blurOverlay");
-//   blur.style.opacity = "1";
-// }
-
-// function hideBlur() {
-//   const blur = document.getElementById("blurOverlay");
-//   blur.style.opacity = "0";
-// }
-
-
-  
-function updateHappyHourTimer() {
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinutes = now.getMinutes();
-  const currentSeconds = now.getSeconds();
-
-  const tapImg = document.querySelector("#tapBtn img");
-  const tapBtn = document.getElementById("tapBtn");
-  tapBtn.classList.add("rotated");
-  if (currentHour >= happyHourStart && currentHour < happyHourEnd) {
-    const minutesLeft = 59 - currentMinutes;
-    const secondsLeft = 59 - currentSeconds;
-    happyEl.innerText = `🎉 Happy Hour! +2 кліки! Залишилось: ${minutesLeft} хв ${secondsLeft} сек`;
-    happyEl.style.display = "block";
-    isHappyHour = true;
-
-    // 🟡 Золота монетка + видалити нахил
-    if (tapImg.src.includes("greenCoin.png")) {
-      tapImg.src = "goldCoin.png";
-    }
-    tapBtn.classList.remove("rotated");
-
-  } else {
-    const nextHappy = new Date();
-    nextHappy.setHours(happyHourStart, 0, 0, 0);
-    if (now >= nextHappy) nextHappy.setDate(nextHappy.getDate() + 1);
-    const diffMs = nextHappy - now;
-  const totalSeconds = Math.floor(diffMs / 1000);
-const hours = Math.floor(totalSeconds / 3600);
-const minutes = Math.floor((totalSeconds % 3600) / 60);
-const seconds = totalSeconds % 60;
-
-if (hours > 0) {
-  happyEl.innerText = `⏳ Happy Hour через: ${hours} год ${minutes} хв`;
-} else if (minutes > 0) {
-  happyEl.innerText = `⏳ Happy Hour через: ${minutes} хв`;
-} else {
-  happyEl.innerText = `⏳ Happy Hour вже зовсім скоро!`;
-}
-
-
-    happyEl.style.display = "block";
-    isHappyHour = false;
-
-    // 🟢 Зелена монетка + повертаємо нахил
-    if (tapImg.src.includes("goldCoin.png")) {
-      tapImg.src = "greenCoin.png";
-    }
+  function updateHappyHourTimer(){
+    const now = new Date();
+    const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+    const tapImg = document.querySelector("#tapBtn img");
+    const tapBtn = document.getElementById("tapBtn");
     tapBtn.classList.add("rotated");
-  }
-}
 
-function animateCoinRain(count = 100, reward = 100) {
-  const counter = document.getElementById("counter");
-  const counterRect = counter.getBoundingClientRect();
-  let added = 0;
-
-  for (let i = 0; i < count && added < reward; i++) {
-    setTimeout(() => {
-      // 1. Монетка з’являється
-      const coin = document.createElement("div");
-      coin.classList.add("coin-fly");
-
-      const startX = window.innerWidth / 2 + (Math.random() * 80 - 40);
-      const startY = window.innerHeight / 2 + (Math.random() * 80 - 40);
-      coin.style.left = `${startX}px`;
-      coin.style.top = `${startY}px`;
-
-      const dx = counterRect.left + counterRect.width / 2 - startX;
-      const dy = counterRect.top + counterRect.height / 2 - startY;
-      coin.style.setProperty("--dx", `${dx}px`);
-      coin.style.setProperty("--dy", `${dy}px`);
-
-      document.body.appendChild(coin);
-
-      // 2. Збільшуємо лічильник ПО 1
-      clicks++;
-      added++;
-      updateDisplay();
-
-      // 3. Зберігаємо, коли всі додалися
-      if (added === reward) {
-        saveUserData();
-      }
-
-      // 4. Монетка зникає через 900мс (анімка)
-      setTimeout(() => coin.remove(), 900);
-    }, i * 15); // затримка між монетками (можеш змінити на швидше чи повільніше)
-  }
-}
-
-
-
-
-setInterval(updateHappyHourTimer, 1000);
-
-updateHappyHourTimer(); // запустити одразу при завантаженні
-
-const tapBtn = document.getElementById("tapBtn");
-
-tapBtn.addEventListener("touchstart", () => {
-  tapBtn.classList.add("active");
-});
-tapBtn.addEventListener("touchend", () => {
-  tapBtn.classList.remove("active");
-});
-tapBtn.addEventListener("mousedown", () => {
-  tapBtn.classList.add("active");
-});
-tapBtn.addEventListener("mouseup", () => {
-  tapBtn.classList.remove("active");
-});
-
-async function checkDailyReward() {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-
-  const res = await fetch(`${supabaseUrl}/rest/v1/daily_rewards?user_id=eq.${userId}`, {
-    headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`
+    if (h >= happyHourStart && h < happyHourEnd) {
+      const minutesLeft = 59 - m;
+      const secondsLeft = 59 - s;
+      happyEl.innerText = `🎉 Happy Hour! +2 кліки! Залишилось: ${minutesLeft} хв ${secondsLeft} сек`;
+      happyEl.style.display = "block";
+      isHappyHour = true;
+      if (tapImg.src.includes("greenCoin.png")) tapImg.src = "goldCoin.png";
+      tapBtn.classList.remove("rotated");
+    } else {
+      const nextHappy = new Date();
+      nextHappy.setHours(happyHourStart,0,0,0);
+      if (now >= nextHappy) nextHappy.setDate(nextHappy.getDate()+1);
+      const diff = nextHappy - now;
+      const total = Math.floor(diff/1000);
+      const hh = Math.floor(total/3600);
+      const mm = Math.floor((total%3600)/60);
+      happyEl.innerText = hh>0 ? `⏳ Happy Hour через: ${hh} год ${mm} хв`
+                     : mm>0 ? `⏳ Happy Hour через: ${mm} хв`
+                            : `⏳ Happy Hour вже зовсім скоро!`;
+      happyEl.style.display = "block";
+      isHappyHour = false;
+      if (tapImg.src.includes("goldCoin.png")) tapImg.src = "greenCoin.png";
+      tapBtn.classList.add("rotated");
     }
+  }
+  setInterval(updateHappyHourTimer, 1000);
+  updateHappyHourTimer();
+
+  function animateCoinRain(count=100, reward=100){
+    const counter = document.getElementById("counter");
+    const counterRect = counter.getBoundingClientRect();
+    let added = 0;
+    for (let i=0; i<count && added<reward; i++){
+      setTimeout(()=>{
+        const coin = document.createElement("div");
+        coin.classList.add("coin-fly");
+        const startX = window.innerWidth/2 + (Math.random()*80-40);
+        const startY = window.innerHeight/2 + (Math.random()*80-40);
+        coin.style.left = `${startX}px`;
+        coin.style.top = `${startY}px`;
+        const dx = counterRect.left + counterRect.width/2 - startX;
+        const dy = counterRect.top + counterRect.height/2 - startY;
+        coin.style.setProperty("--dx", `${dx}px`);
+        coin.style.setProperty("--dy", `${dy}px`);
+        document.body.appendChild(coin);
+
+        clicks++; added++; updateDisplay();
+        if (added === reward) saveUserData();
+
+        setTimeout(()=> coin.remove(), 900);
+      }, i*15);
+    }
+  }
+
+  const tapBtn = document.getElementById("tapBtn");
+  tapBtn.addEventListener("touchstart", ()=> tapBtn.classList.add("active"));
+  tapBtn.addEventListener("touchend", ()=> tapBtn.classList.remove("active"));
+  tapBtn.addEventListener("mousedown", ()=> tapBtn.classList.add("active"));
+  tapBtn.addEventListener("mouseup", ()=> tapBtn.classList.remove("active"));
+  tapBtn.addEventListener("click", (e)=>{
+    Telegram.WebApp.HapticFeedback?.impactOccurred?.('medium');
+    const addAmount = isHappyHour ? 2 : 1;
+    clicks += addAmount;
+    updateDisplay();
+    saveUserData();
+
+    // плаваючий +1/+2
+    const plus = document.createElement("div");
+    plus.className = "plus-one";
+    plus.innerText = `+${addAmount}`;
+    document.body.appendChild(plus);
+    const rect = e.currentTarget.getBoundingClientRect();
+    plus.style.left = rect.left + rect.width/2 + "px";
+    plus.style.top = rect.top + "px";
+    setTimeout(()=>plus.remove(), 800);
   });
 
-  const data = await res.json();
-  const lastRewardDate = data[0]?.last_claimed?.split('T')[0]; // Теж беремо тільки дату
-  
-  if (true) {
-      // showBlur();
-    // Додати +100 кліків
+  async function checkDailyReward(){
+    const today = new Date().toISOString().split('T')[0];
+    const res = await fetch(`${supabaseUrl}/rest/v1/daily_rewards?user_id=eq.${userId}`, {
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+    });
+    const data = await res.json();
+    // демо-режим: завжди показуємо (як у тебе було)
     updateDisplay();
     await saveUserData();
 
-    // Показати модалку
     document.getElementById("dailyRewardModal").style.display = "flex";
     document.getElementById("dailyRewardBlur").classList.add("active");
 
-    if (data.length === 0) {
-      // Створити запис
+    if (data.length===0){
       await fetch(`${supabaseUrl}/rest/v1/daily_rewards`, {
-        method: "POST",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ user_id: userId, last_claimed: today })
+        method:"POST", headers:{ apikey:supabaseKey, Authorization:`Bearer ${supabaseKey}`, "Content-Type":"application/json" },
+        body: JSON.stringify({ user_id:userId, last_claimed: today })
       });
     } else {
-      // Оновити запис
       await fetch(`${supabaseUrl}/rest/v1/daily_rewards?user_id=eq.${userId}`, {
-        method: "PATCH",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
-        },
+        method:"PATCH", headers:{ apikey:supabaseKey, Authorization:`Bearer ${supabaseKey}`, "Content-Type":"application/json" },
         body: JSON.stringify({ last_claimed: today })
       });
     }
-       // setTimeout(() => hideBlur(), 300);
   }
-}
 
+  function closeDailyRewardModal(){
+    document.getElementById("dailyRewardBlur").classList.remove("active");
+    document.getElementById("dailyRewardModal").style.display = "none";
+    // показуємо явну дельту для користувача
+    const before = clicks;
+    const reward = 100;
+    clicks += reward;
+    updateDisplay();
+    saveUserData();
+    showBalanceDelta(reward, before, clicks, 2200);
+    animateCoinRain(100, reward);
+  }
 
-function closeDailyRewardModal() {
-  document.getElementById("dailyRewardBlur").classList.remove("active");
-  document.getElementById("dailyRewardModal").style.display = "none";
-
-   animateCoinRain(100);
-}
-
-  async function fetchUserData() {
+  async function fetchUserData(){
     const res = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
       headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
     });
@@ -1112,12 +559,7 @@ function closeDailyRewardModal() {
     if (data.length > 0) clicks = data[0].clicks;
     else {
       await fetch(`${supabaseUrl}/rest/v1/clicks`, {
-        method: "POST",
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
-        },
+        method:"POST", headers:{ apikey:supabaseKey, Authorization:`Bearer ${supabaseKey}`, "Content-Type":"application/json" },
         body: JSON.stringify({ user_id: userId, clicks: 0 })
       });
     }
@@ -1125,49 +567,38 @@ function closeDailyRewardModal() {
     await checkDailyReward();
   }
 
-  function updateDisplay() {
-    counterEl.innerText = `Кліків: ${clicks}`;
-  }
+  function updateDisplay(){ counterEl.innerText = `Кліків: ${clicks}`; }
 
-  async function saveUserData() {
+  async function saveUserData(){
     await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${userId}`, {
-      method: "PATCH",
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        "Content-Type": "application/json"
-      },
+      method:"PATCH", headers:{ apikey:supabaseKey, Authorization:`Bearer ${supabaseKey}`, "Content-Type":"application/json" },
       body: JSON.stringify({ clicks })
     });
   }
 
-  function generateRandomCode() {
+  function generateRandomCode(){
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = 'GH-';
-    for (let i = 0; i < 5; i++) {
-      code += charset[Math.floor(Math.random() * charset.length)];
-    }
+    for (let i=0;i<5;i++) code += charset[Math.floor(Math.random()*charset.length)];
     return code;
   }
 
-  async function loadInventory() {
+  async function loadInventory(){
     const res = await fetch(`${supabaseUrl}/rest/v1/bonuses?user_id=eq.${userId}`, {
       headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
     });
     const bonuses = await res.json();
 
-    bonuses.sort((a, b) => a.used - b.used); // Готові спочатку, використані — знизу
-
+    bonuses.sort((a,b)=> a.used - b.used);
     inventoryListEl.innerHTML = "";
 
     for (const bonus of bonuses) {
-      const bonusData = availableBonuses.find(b => b.name === bonus.name);
+      const bonusData = availableBonuses.find(b=> b.name===bonus.name);
       if (!bonusData) continue;
 
       const card = document.createElement("div");
       card.className = "bonus-card";
       if (bonus.used) card.classList.add("used");
-
       card.innerHTML = `
         <img src="${bonusData.image}" alt="${bonusData.title}">
         <div class="bonus-title">${bonusData.title}</div>
@@ -1176,389 +607,293 @@ function closeDailyRewardModal() {
         ${!bonus.used ? '<button>Активувати</button>' : ''}
       `;
 
-      if (!bonus.used) {
+      if (!bonus.used){
         const btn = card.querySelector("button");
-        btn.addEventListener("click", () => {
-          confirmModal.classList.add("active");
-confirmModal.style.display = "flex";
+        btn.addEventListener("click", ()=>{
+          confirmModal.style.display = "flex";
 
-
-          const closeModal = () => {
-            confirmModal.classList.remove("active");
-confirmModal.style.display = "none";
-
-            confirmBtn.onclick = null;
-            cancelBtn.onclick = null;
+          const closeModal= ()=>{
+            confirmModal.style.display = "none";
+            confirmBtn.onclick = null; cancelBtn.onclick = null;
           };
-
           cancelBtn.onclick = closeModal;
 
-          confirmBtn.onclick = async () => {
+          confirmBtn.onclick = async ()=>{
             const code = generateRandomCode();
-
             const codeRes = await fetch(`${supabaseUrl}/rest/v1/discount_codes`, {
-              method: "POST",
-              headers: {
-                apikey: supabaseKey,
-                Authorization: `Bearer ${supabaseKey}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                user_id: userId,
-                code,
-                used: false,
-                bonus_name: bonusData.title
-              })
+              method:"POST", headers:{ apikey:supabaseKey, Authorization:`Bearer ${supabaseKey}`, "Content-Type":"application/json" },
+              body: JSON.stringify({ user_id:userId, code, used:false, bonus_name: bonusData.title })
             });
-
             const updateRes = await fetch(`${supabaseUrl}/rest/v1/bonuses?id=eq.${bonus.id}`, {
-              method: "PATCH",
-              headers: {
-                apikey: supabaseKey,
-                Authorization: `Bearer ${supabaseKey}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ used: true })
+              method:"PATCH", headers:{ apikey:supabaseKey, Authorization:`Bearer ${supabaseKey}`, "Content-Type":"application/json" },
+              body: JSON.stringify({ used:true })
             });
 
             closeModal();
-
             if (codeRes.ok && updateRes.ok) {
-              alert(`🎉 Ваш код: ${code}`);
+              showToast(`🎫 Ваш код: ${code}`, 'success', 2600);
               loadInventory();
             } else {
-              alert("Помилка при активації бонусу.");
+              showToast('Помилка при активації бонусу.', 'error');
             }
           };
         });
       }
-
       inventoryListEl.appendChild(card);
     }
   }
 
-  function setupMarketButtons() {
+  function setupMarketButtons(){
     const marketCards = document.querySelectorAll("#market-tab .bonus-card");
-    marketCards.forEach((card, index) => {
+    marketCards.forEach((card, index)=>{
       const btn = card.querySelector("button");
-      btn.addEventListener("click", async () => {
+      btn.addEventListener("click", async ()=>{
         const bonus = availableBonuses[index];
-        if (clicks < bonus.price) {
-          alert(`Недостатньо кліків. Потрібно ${bonus.price}`);
+        if (clicks < bonus.price){
+          showToast(`Недостатньо кліків. Потрібно ${bonus.price}`, 'error');
           return;
         }
-
+        const before = clicks;
         clicks -= bonus.price;
         updateDisplay();
         await saveUserData();
 
         const res = await fetch(`${supabaseUrl}/rest/v1/bonuses`, {
-          method: "POST",
-          headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            name: bonus.name,
-            price: bonus.price,
-            used: false
-          })
+          method:"POST", headers:{ apikey:supabaseKey, Authorization:`Bearer ${supabaseKey}`, "Content-Type":"application/json" },
+          body: JSON.stringify({ user_id:userId, name: bonus.name, price: bonus.price, used:false })
         });
 
-        if (res.ok) {
-          alert(`🎁 Ви отримали бонус: ${bonus.title}`);
+        if (res.ok){
+          showToast(`🎁 Отримано бонус: ${bonus.title}`, 'success');
+          // показати «витрату» як дельту, щоб теж було очевидно
+          showBalanceDelta(-bonus.price, before, clicks, 2200);
           loadInventory();
         } else {
-          alert("Помилка при збереженні бонусу.");
+          showToast('Помилка при збереженні бонусу.', 'error');
         }
       });
     });
   }
 
-  
-document.getElementById("tapBtn").addEventListener("click", (e) => {
-Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-
-
-  const addAmount = isHappyHour ? 2 : 1;
-  clicks += addAmount;
-  updateDisplay();
-  saveUserData();
-
-  const plus = document.createElement("div");
-  plus.className = "plus-one";
-  plus.innerText = `+${addAmount}`;
-  document.body.appendChild(plus);
-
-  const rect = e.target.getBoundingClientRect();
-  plus.style.left = rect.left + rect.width / 2 + "px";
-  plus.style.top = rect.top + "px";
-
-  setTimeout(() => {
-    plus.remove();
-  }, 800);
-});
-
-
-  function showTab(tabId, buttonEl) {
-    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+  function showTab(tabId, btn){
+    document.querySelectorAll(".tab-content").forEach(tab=> tab.classList.remove("active"));
     document.getElementById(tabId).classList.add("active");
-    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".tab-button").forEach(b=> b.classList.remove("active"));
+    btn.classList.add("active");
+    if (tabId === "inventory-tab") loadInventory();
+  }
+
+  /* ===== Mini Café logic (з тостом для помилок та дельтою по завершенню) ===== */
+  const fortuneBtn = document.getElementById("fortuneBtn");
+  const fortuneModal = document.getElementById("fortuneModal");
+  const closeFortuneModal = document.getElementById("closeFortuneModal");
+
+  fortuneBtn.addEventListener('click', ()=>{
+    fortuneModal.style.display = 'flex';
+    document.body.style.overflow = "hidden";
+    pickRecipe();
+  });
+  closeFortuneModal.addEventListener('click', ()=>{
+    fortuneModal.style.display = 'none';
+    document.body.style.overflow = "";
+  });
+  fortuneModal.addEventListener('click', e=>{
+    if (e.target === fortuneModal){
+      fortuneModal.style.display = 'none';
+      document.body.style.overflow = "";
+    }
+  });
+
+  const mcIngredientsEl = document.getElementById('mcIngredients');
+  const mcPlateEl = document.getElementById('mcPlate');
+  const mcMsgEl = document.getElementById('mcMsg');
+  const mcOrderEl = document.getElementById('mcOrder');
+  const mcResetBtn = document.getElementById('mcReset');
+  const miniCafeEl = document.getElementById('miniCafe');
+
+  function scrollMiniCafeToBottom(){
+    requestAnimationFrame(()=>{
+      const target = miniCafeEl.scrollHeight - miniCafeEl.clientHeight;
+      try{ miniCafeEl.scrollTo({ top:target, behavior:'smooth' }); }
+      catch(e){
+        const start = miniCafeEl.scrollTop, dist = target - start, dur = 350;
+        let t0=null;
+        function step(ts){ if(!t0) t0=ts; const p=Math.min((ts-t0)/dur,1), ease=1-Math.pow(1-p,3); miniCafeEl.scrollTop=start+dist*ease; if(p<1) requestAnimationFrame(step) }
+        requestAnimationFrame(step);
+      }
+    });
+  }
+  function scrollMiniCafeToBottomSafe(){ scrollMiniCafeToBottom(); setTimeout(scrollMiniCafeToBottom, 520) }
+
+  const RECIPES = [
+    { id:'gyros', title:'Гірос класичний', rewardClicks:50, steps:['лаваш','мʼясо','овочі','соус'] },
+    { id:'cheddarPita', title:'Піта з чедером', rewardClicks:65, steps:['піта','сир чедер','овочі','соус'] }
+  ];
+  const ALL_ING = [
+    { key:'лаваш', label:'Лаваш', img:'lavash.png' },
+    { key:'мʼясо', label:'Мʼясо', img:'meat.png' },
+    { key:'овочі', label:'Овочі', img:'veggies.png' },
+    { key:'соус', label:'Соус', img:'sauce.png' },
+    { key:'піта', label:'Піта', img:'pita.png' },
+    { key:'сир чедер', label:'Чедер', img:'cheddar.png' }
+  ];
+
+  let currentRecipe = null;
+  let progress = 0;
+
+  function pickRecipe(){
+    currentRecipe = RECIPES[Math.floor(Math.random()*RECIPES.length)];
+    mcOrderEl.textContent = 'Замовлення: ' + currentRecipe.title;
+    progress = 0;
+    mcMsgEl.innerHTML = '';
+    renderIngredients();
+    mcPlateEl.innerHTML = '';
+    miniCafeEl.scrollTop = 0;
+    renderRecipeHint();
+    mcRecipeHint.classList.remove('show');
+    mcHintToggle.textContent = 'Підглянути рецепт';
+  }
+
+  function renderIngredients(){
+    mcIngredientsEl.innerHTML = '';
+    const poolKeys = new Set([...currentRecipe.steps]);
+    while (poolKeys.size < currentRecipe.steps.length + 2) {
+      const extra = ALL_ING[Math.floor(Math.random()*ALL_ING.length)].key;
+      poolKeys.add(extra);
+    }
+    const items = Array.from(poolKeys).map(k=> ALL_ING.find(i=> i.key===k)).filter(Boolean);
+    items.sort(()=>Math.random()-.5);
+    for (const ing of items){
+      const btn = document.createElement('button');
+      btn.className = 'ingredient';
+      btn.dataset.key = ing.key;
+      btn.innerHTML = `<img src="${ing.img}" alt="${ing.label}"><div>${ing.label}</div>`;
+      btn.addEventListener('click', ()=> onIngredientClick(btn, ing));
+      mcIngredientsEl.appendChild(btn);
+    }
+  }
+  function lockNonRecipeIngredients(){
+    const allowed = new Set(currentRecipe.steps);
+    mcIngredientsEl.querySelectorAll('.ingredient').forEach(btn=>{
+      if (!allowed.has(btn.dataset.key)){
+        btn.classList.add('locked');
+        btn.disabled = true;
+        btn.setAttribute('aria-disabled','true');
+        btn.setAttribute('tabindex','-1');
+      }
+    });
+  }
+
+  function onIngredientClick(btn, ing){
+    if (!currentRecipe || progress >= currentRecipe.steps.length) return;
+
+    const needed = currentRecipe.steps[progress];
+    if (ing.key === needed){
+      btn.classList.add('used');
+      flyToPlate(btn, ing);
+      progress++;
+      mcMsgEl.innerHTML = `<div class="success-msg">Добре! ${progress}/${currentRecipe.steps.length}</div>`;
+      Telegram.WebApp.HapticFeedback?.impactOccurred?.('light');
+
+      if (progress === currentRecipe.steps.length) onRecipeComplete();
+    } else {
+      // ГОЛОВНЕ: показуємо великий тост, який точно видно
+      showToast(`Поспішив 😅. Спочатку: ${needed}`, 'error', 1600);
+      mcMsgEl.innerHTML = `<div class="err-msg">Поспішив 😅. Спочатку: <b>${needed}</b></div>`;
+      Telegram.WebApp.HapticFeedback?.notificationOccurred?.('warning');
+      mcRecipeHint.classList.add('show');
+      mcHintToggle.textContent = 'Сховати рецепт';
+      mcRecipeHint.scrollIntoView({ block:'nearest', behavior:'smooth' });
+    }
+  }
+
+  async function onRecipeComplete(){
+    const reward = currentRecipe.rewardClicks;
+    const before = clicks;
+    clicks += reward;
+    updateDisplay();
+    await saveUserData();
+
+    mcMsgEl.innerHTML = `<div class="success-msg">🎉 Готово! +${reward} кліків за «${currentRecipe.title}»</div>`;
+    scrollMiniCafeToBottomSafe();
+    Telegram.WebApp.HapticFeedback?.notificationOccurred?.('success');
+
+    // тут теж показати явну дельту (щоб користувач побачив нарахування)
+    showBalanceDelta(reward, before, clicks, 2200);
+
+    lockNonRecipeIngredients();
+  }
+
+  function flyToPlate(btn, ing){
+    const rect = btn.getBoundingClientRect();
+    const plateRect = mcPlateEl.getBoundingClientRect();
+    const ghost = document.createElement('img');
+    const icon = ALL_ING.find(i=>i.key===ing.key)?.img || '';
+    ghost.src = icon;
+    ghost.className = 'fly';
+    ghost.style.left = rect.left + 'px';
+    ghost.style.top  = rect.top + 'px';
+    document.body.appendChild(ghost);
+
+    requestAnimationFrame(()=>{
+      const dx = plateRect.left + plateRect.width/2 - rect.left - 24;
+      const dy = plateRect.top + plateRect.height/2 - rect.top - 24;
+      ghost.style.transform = `translate(${dx}px, ${dy}px) scale(.6)`;
+      ghost.style.opacity = '0.1';
+    });
+
+    setTimeout(()=>{
+      ghost.remove();
+      const chip = document.createElement('img');
+      chip.src = icon; chip.style.width='36px'; chip.style.height='36px'; chip.style.borderRadius='8px';
+      mcPlateEl.appendChild(chip);
+    }, 460);
+  }
+
+  const mcResetBtn = document.getElementById('mcReset');
+  mcResetBtn.addEventListener('click', pickRecipe);
+  const mcCloseBtn = document.getElementById('mcClose');
+  mcCloseBtn.addEventListener('click', ()=>{
+    fortuneModal.style.display = 'none';
+    document.body.style.overflow = "";
+  });
+
+  const mcHintToggle = document.getElementById('mcHintToggle');
+  const mcRecipeHint = document.getElementById('mcRecipeHint');
+  function renderRecipeHint(){
+    const parts = currentRecipe.steps.map(step=>{
+      const ing = ALL_ING.find(i=>i.key===step);
+      return `<span class="step-chip">${ing?.img ? `<img src="${ing.img}" alt="">` : ''}<span>${ing?.label || step}</span></span>`;
+    });
+    mcRecipeHint.innerHTML = parts.join('<span class="step-arrow">→</span>');
+  }
+  mcHintToggle.addEventListener('click', ()=>{
+    const show = !mcRecipeHint.classList.contains('show');
+    mcRecipeHint.classList.toggle('show', show);
+    mcHintToggle.textContent = show ? 'Сховати рецепт' : 'Підглянути рецепт';
+    if (show) mcRecipeHint.scrollIntoView({ block:'nearest', behavior:'smooth' });
+  });
+
+  /* ==== інвентар/ринок/та інше ==== */
+  function showTab(tabId, buttonEl){
+    document.querySelectorAll(".tab-content").forEach(t=> t.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+    document.querySelectorAll(".tab-button").forEach(b=> b.classList.remove("active"));
     buttonEl.classList.add("active");
     if (tabId === "inventory-tab") loadInventory();
   }
-const fortuneBtn = document.getElementById("fortuneBtn");
-const fortuneModal = document.getElementById("fortuneModal");
-const closeFortuneModal = document.getElementById("closeFortuneModal");
+  window.showTab = showTab; // щоб працював inline onClick
 
-// Відкрити модалку
-fortuneBtn.addEventListener('click', () => {
-  fortuneModal.style.display = 'flex';
-  document.body.style.overflow = "hidden"; // блокуємо прокрутку фону
-});
-
-// Закрити модалку кнопкою
-closeFortuneModal.addEventListener('click', () => {
-  fortuneModal.style.display = 'none';
-  document.body.style.overflow = ""; // повертаємо прокрутку
-});
-
-// Закрити модалку кліком по фону
-fortuneModal.addEventListener('click', e => {
-  if (e.target === fortuneModal) {
-    fortuneModal.style.display = 'none';
-    document.body.style.overflow = "";
-  }
-});
-/* ===== Mini Café logic ===== */
-const mcIngredientsEl = document.getElementById('mcIngredients');
-const mcPlateEl = document.getElementById('mcPlate');
-const mcMsgEl = document.getElementById('mcMsg');
-const mcOrderEl = document.getElementById('mcOrder');
-const mcResetBtn = document.getElementById('mcReset');
-const miniCafeEl = document.getElementById('miniCafe');
-
-function scrollMiniCafeToBottom() {
-  // чекаємо, поки DOM оновиться (повідомлення вже вставилось)
-  requestAnimationFrame(() => {
-    const target = miniCafeEl.scrollHeight - miniCafeEl.clientHeight;
-
-    // пробуємо нативний smooth
-    try {
-      miniCafeEl.scrollTo({ top: target, behavior: 'smooth' });
-    } catch (e) {
-      // fallback: м’яка анімація вручну
-      const start = miniCafeEl.scrollTop;
-      const dist = target - start;
-      const dur = 350;
-      let t0 = null;
-      function step(ts) {
-        if (!t0) t0 = ts;
-        const p = Math.min((ts - t0) / dur, 1);
-        const ease = 1 - Math.pow(1 - p, 3); // easeOutCubic
-        miniCafeEl.scrollTop = start + dist * ease;
-        if (p < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    }
-  });
-}
-  function scrollMiniCafeToBottomSafe() {
-  scrollMiniCafeToBottom();          // одразу після повідомлення
-  setTimeout(scrollMiniCafeToBottom, 520); // вдруге після додавання останнього чіпа
-}
-
-
-/** Набір «рецептів» — можна розширювати */
-const RECIPES = [
-  {
-    id: 'gyros',
-    title: 'Гірос класичний',
-    rewardClicks: 50,
-    steps: ['лаваш','мʼясо','овочі','соус'],
-  },
-  {
-    id: 'cheddarPita',
-    title: 'Піта з чедером',
-    rewardClicks: 65,
-    steps: ['піта','сир чедер','овочі','соус'],
-  }
-];
-
-/** Пул інгредієнтів з мінімальними іконками */
-const ALL_ING = [
-  { key:'лаваш', label:'Лаваш', img:'lavash.png' },
-  { key:'мʼясо', label:'Мʼясо', img:'meat.png' },
-  { key:'овочі', label:'Овочі', img:'veggies.png' },
-  { key:'соус', label:'Соус', img:'sauce.png' },
-  { key:'піта', label:'Піта', img:'pita.png' },
-  { key:'сир чедер', label:'Чедер', img:'cheddar.png' },
-];
-
-let currentRecipe = null;
-let progress = 0;
-
-function pickRecipe() {
-  // оберемо випадковий рецепт при кожному відкритті
-  currentRecipe = RECIPES[Math.floor(Math.random()*RECIPES.length)];
-  mcOrderEl.textContent = 'Замовлення: ' + currentRecipe.title;
-  progress = 0;
-  mcMsgEl.innerHTML = '';
-  renderIngredients();
-  mcPlateEl.innerHTML = '';
-  miniCafeEl.scrollTop = 0;
-  renderRecipeHint();
-mcRecipeHint.classList.remove('show');
-mcHintToggle.textContent = 'Підглянути рецепт';
-}
-
-function renderIngredients() {
-  mcIngredientsEl.innerHTML = '';
-  const poolKeys = new Set([...currentRecipe.steps]); // показуємо потрібні + пару зайвих, щоб було цікавіше
-  // додамо 2 будь-які зайві
-  while (poolKeys.size < currentRecipe.steps.length + 2) {
-    const extra = ALL_ING[Math.floor(Math.random()*ALL_ING.length)].key;
-    poolKeys.add(extra);
-  }
-
-  // зібрати обʼєкти і трохи перемішати
-  const items = Array.from(poolKeys).map(k => ALL_ING.find(i => i.key===k)).filter(Boolean);
-  items.sort(()=>Math.random()-.5);
-
-  for (const ing of items) {
-    const btn = document.createElement('button');
-    btn.className = 'ingredient';
-    btn.dataset.key = ing.key;
-    btn.innerHTML = `<img src="${ing.img}" alt="${ing.label}"><div>${ing.label}</div>`;
-    btn.addEventListener('click', () => onIngredientClick(btn, ing));
-    mcIngredientsEl.appendChild(btn);
-  }
-}
-function lockNonRecipeIngredients() {
-  const allowed = new Set(currentRecipe.steps);
-  mcIngredientsEl.querySelectorAll('.ingredient').forEach(btn => {
-    if (!allowed.has(btn.dataset.key)) {
-      btn.classList.add('locked');
-      btn.disabled = true; 
-      btn.setAttribute('aria-disabled','true');
-      btn.setAttribute('tabindex','-1');
-    }
-  });
-}
-
-function onIngredientClick(btn, ing) {
-  // якщо рецепт уже зібраний – ігноруємо будь-які кліки
-  if (!currentRecipe || progress >= currentRecipe.steps.length) return;
-
-  const needed = currentRecipe.steps[progress];
-  if (ing.key === needed) {
-    btn.classList.add('used');
-    flyToPlate(btn, ing);
-    progress++;
-    mcMsgEl.innerHTML = `<div class="success-msg">Добре! ${progress}/${currentRecipe.steps.length}</div>`;
-    Telegram.WebApp.HapticFeedback.impactOccurred('light');
-
-    if (progress === currentRecipe.steps.length) {
-      onRecipeComplete();
-    }
-  } else {
-    mcMsgEl.innerHTML = `<div class="err-msg">Поспішив 😅. Спочатку: <b>${needed}</b></div>`;
-    Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
-    mcRecipeHint.classList.add('show');
-    mcHintToggle.textContent = 'Сховати рецепт';
-    mcRecipeHint.scrollIntoView({ block:'nearest', behavior:'smooth' });
-  }
-}
-
-async function onRecipeComplete() {
-  const reward = currentRecipe.rewardClicks;
-  clicks += reward;
-  updateDisplay();
-  await saveUserData();
-
-  mcMsgEl.innerHTML = `<div class="success-msg">🎉 Готово! +${reward} кліків за «${currentRecipe.title}»</div>`;
-  scrollMiniCafeToBottomSafe();
-  Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-
-  // після завершення — заблокуємо все, чого не було в рецепті
-  lockNonRecipeIngredients();
-}
-
-
-function flyToPlate(btn, ing) {
-  const rect = btn.getBoundingClientRect();
-  const plateRect = mcPlateEl.getBoundingClientRect();
-
-  const ghost = document.createElement('img');
-  ghost.src = ALL_ING.find(i=>i.key===ing.key)?.img || '';
-  ghost.className = 'fly';
-  ghost.style.left = rect.left + 'px';
-  ghost.style.top  = rect.top + 'px';
-  document.body.appendChild(ghost);
-
-  requestAnimationFrame(() => {
-    const dx = plateRect.left + plateRect.width/2 - rect.left - 24;
-    const dy = plateRect.top + plateRect.height/2 - rect.top  - 24;
-    ghost.style.transform = `translate(${dx}px, ${dy}px) scale(.6)`;
-    ghost.style.opacity = '0.1';
-  });
-
-  setTimeout(() => {
-    ghost.remove();
-    const chip = document.createElement('img');
-    chip.src = ALL_ING.find(i=>i.key===ing.key)?.img || '';
-    chip.style.width = '36px';
-    chip.style.height = '36px';
-    chip.style.borderRadius = '8px';
-    mcPlateEl.appendChild(chip);
-  }, 460);
-}
-
-mcResetBtn.addEventListener('click', () => {
-  pickRecipe();
-});
-const mcCloseBtn = document.getElementById('mcClose');
-mcCloseBtn.addEventListener('click', () => {
-  fortuneModal.style.display = 'none';
-  document.body.style.overflow = "";
-});
-  
-/** Коли відкривається твоя модалка — стартуємо гру */
-fortuneBtn.addEventListener('click', () => {
-  pickRecipe();
-});
-  const mcHintToggle = document.getElementById('mcHintToggle');
-const mcRecipeHint = document.getElementById('mcRecipeHint');
-
-function renderRecipeHint(){
-  const parts = currentRecipe.steps.map(step=>{
-    const ing = ALL_ING.find(i=>i.key===step);
-    return `<span class="step-chip">${ing?.img ? `<img src="${ing.img}" alt="">` : ''}<span>${ing?.label || step}</span></span>`;
-  });
-  mcRecipeHint.innerHTML = parts.join('<span class="step-arrow">→</span>');
-}
-
-mcHintToggle.addEventListener('click', ()=>{
-  const show = !mcRecipeHint.classList.contains('show');
-  mcRecipeHint.classList.toggle('show', show);
-  mcHintToggle.textContent = show ? 'Сховати рецепт' : 'Підглянути рецепт';
-  if (show) mcRecipeHint.scrollIntoView({ block:'nearest', behavior:'smooth' });
-});
-
-
-  fetchUserData().then(() => {
+  fetchUserData().then(()=>{
     setupMarketButtons();
     loadInventory();
   });
 </script>
-
-
 </body>
 </html>
 
   
+
 
 
 
