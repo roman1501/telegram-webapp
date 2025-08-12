@@ -516,16 +516,7 @@ backdrop-filter: blur(10px);
   height: 72px;
   pointer-events: none;
 }
-@media (max-width: 600px) {
-  .fortune-btn { 
-    top: 14px;
-    right: 12px;
-    padding: 7px;
-  }
-  .fortune-btn img { 
-    width: 44px; height: 44px; 
-  }
-}
+
 .fortune-modal {
   display: none;
   position: fixed;
@@ -539,6 +530,7 @@ backdrop-filter: blur(10px);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
   animation: fadeInModalBg .33s;
+  overscroll-behavior: contain;
 }
 @keyframes fadeInModalBg {
   from { opacity: 0; }
@@ -597,36 +589,6 @@ backdrop-filter: blur(10px);
   width: min(520px, 95vw);
 }
 
-/* на мобілці — теж без «стрибків» */
-@media (max-width: 600px){
-  .mini-cafe .worktop {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;                 /* було 12px */
-  }
-
-  .plate-wrap { 
-    margin-top: -12px;        /* підняли тарілку вище */
-    width: 200px;
-    height: 140px;
-  }
-
-  .ingredients {
-    grid-template-columns: repeat(2, minmax(80px, 1fr));
-    gap: 14px;
-  }
-
-  .plate {
-    width: 200px;
-    height: 80px;
-    border-radius: 0 0 100px 100px;
-  }
-
-  .on-plate {
-    width: 170px;
-    bottom: 30px;
-  }
-}
 
 /* не даємо внутрішнім блокам розширювати контент */
 #miniCafe, .recipe-hint{
@@ -640,10 +602,8 @@ backdrop-filter: blur(10px);
 
 /* щоб чіпи не ламали рядок всередині себе */
 .step-chip{ white-space: nowrap; }
-
-}
 /* ===== Mini Café ===== */
-.mini-cafe { display:flex; flex-direction:column; gap:12px; align-items:center;   overflow: auto; padding-bottom: 12px; flex:1 1 auto;  -webkit-overflow-scrolling:touch;  padding:12px; }
+.mini-cafe { display:flex;  min-height: 0; flex-direction:column; gap:12px; align-items:center;   overflow: auto; padding-bottom: 12px; flex:1 1 auto;  -webkit-overflow-scrolling:touch;  padding:12px; }
 .mini-cafe .order { font-weight:700; color:#0c6a3a; background:#eaffea; border:1px solid #c8f5d9; padding:8px 12px; border-radius:12px; }
 .mini-cafe .worktop { display:flex; gap:12px; align-items:flex-end; justify-content:center; }
 .ingredients {
@@ -692,32 +652,44 @@ backdrop-filter: blur(10px);
 }
 .success-msg { color:#0d8a54; font-weight:700; margin-top:6px; }
 .err-msg { color:#b00020; font-weight:600; margin-top:6px; }
-
-@media (max-width: 600px) {
-  .mini-cafe .worktop {
+@media (max-width: 600px){
+  .mini-cafe .worktop{
     flex-direction: column;
     align-items: center;
-  .mini-cafe .worktop { gap: 8px; }     /* було 12px */
-  .plate-wrap { margin-top: -12px; }     /* підняли тарілку вище */
+    gap: 8px;              /* було 12px */
   }
-  .ingredients {
-    grid-template-columns:repeat(2, minmax(80px,1fr));
-    gap:14px;
-  }
-  .plate-wrap {
+
+  .plate-wrap{
+    margin-top: -12px;     /* підняли тарілку */
     width: 200px;
     height: 140px;
   }
-  .plate {
+
+  .ingredients{
+    grid-template-columns: repeat(2, minmax(80px, 1fr));
+    gap: 14px;
+  }
+
+  .plate{
     width: 200px;
     height: 80px;
     border-radius: 0 0 100px 100px;
   }
-  .on-plate {
+
+  .on-plate{
     width: 170px;
     bottom: 30px;
   }
 }
+
+/* на всяк випадок: ці дві — поза media, щоб не рвали ширину */
+#miniCafe, .recipe-hint{
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.step-chip{ white-space: nowrap; }
+
 .mc-footer {
   bottom: 0;
   display: flex;
@@ -1587,6 +1559,7 @@ mcHintToggle.addEventListener('click', ()=>{
 </html>
 
   
+
 
 
 
