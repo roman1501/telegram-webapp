@@ -893,7 +893,11 @@ backdrop-filter: blur(10px);
 <script>
   
   const tg = window.Telegram.WebApp;
+  tg.ready();
+
+if (!tg.isExpanded) {
   tg.expand();
+}
 
   const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
@@ -1604,6 +1608,7 @@ mcHintToggle.addEventListener('click', ()=>{
 
 
   
+
 
 
 
