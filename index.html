@@ -894,22 +894,22 @@ backdrop-filter: blur(10px);
   
   const tg = window.Telegram.WebApp;
   
-tg.ready();
+// tg.ready();
 
-if (typeof tg.requestFullscreen === 'function') {
-  tg.requestFullscreen();
-} else {
-  console.warn('Fullscreen not supported, falling back to expand()');
-  tg.expand?.();
-}
+// if (typeof tg.requestFullscreen === 'function') {
+//   tg.requestFullscreen();
+// } else {
+//   console.warn('Fullscreen not supported, falling back to expand()');
+//   tg.expand?.();
+// }
 
-tg.onEvent('fullscreen_changed', event => {
-  console.log('Fullscreen state:', event.is_fullscreen);
-});
+// tg.onEvent('fullscreen_changed', event => {
+//   console.log('Fullscreen state:', event.is_fullscreen);
+// });
 
-tg.onEvent('fullscreen_failed', event => {
-  console.warn('Fullscreen failed:', event.error);
-});
+// tg.onEvent('fullscreen_failed', event => {
+//   console.warn('Fullscreen failed:', event.error);
+// });
 
   const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
@@ -1620,6 +1620,7 @@ mcHintToggle.addEventListener('click', ()=>{
 
 
   
+
 
 
 
