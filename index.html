@@ -749,6 +749,49 @@ backdrop-filter: blur(10px);
   filter: grayscale(60%);
   cursor: not-allowed;
 }
+/* ===== Адаптація під ноутбуки ===== */
+@media (min-width: 1024px) {
+  .market-section,
+  .inventory-section {
+    max-width: 1000px;
+    margin: 0 auto; /* Центрування */
+    padding: 20px;
+  }
+
+  .market-items,
+  .inventory-items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+/* ===== Адаптація під планшети ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .market-section,
+  .inventory-section {
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 15px;
+  }
+
+  .market-items,
+  .inventory-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+/* ===== Мобільні телефони (як зараз) ===== */
+@media (max-width: 767px) {
+  .market-items,
+  .inventory-items {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
 
   </style>
 </head>
@@ -894,22 +937,22 @@ backdrop-filter: blur(10px);
   
   const tg = window.Telegram.WebApp;
   
-// tg.ready();
+tg.ready();
 
-// if (typeof tg.requestFullscreen === 'function') {
-//   tg.requestFullscreen();
-// } else {
-//   console.warn('Fullscreen not supported, falling back to expand()');
-//   tg.expand?.();
-// }
+if (typeof tg.requestFullscreen === 'function') {
+  tg.requestFullscreen();
+} else {
+  console.warn('Fullscreen not supported, falling back to expand()');
+  tg.expand?.();
+}
 
-// tg.onEvent('fullscreen_changed', event => {
-//   console.log('Fullscreen state:', event.is_fullscreen);
-// });
+tg.onEvent('fullscreen_changed', event => {
+  console.log('Fullscreen state:', event.is_fullscreen);
+});
 
-// tg.onEvent('fullscreen_failed', event => {
-//   console.warn('Fullscreen failed:', event.error);
-// });
+tg.onEvent('fullscreen_failed', event => {
+  console.warn('Fullscreen failed:', event.error);
+});
 
   const supabaseUrl = 'https://mftgqxilushpzewpqkvi.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdGdxeGlsdXNocHpld3Bxa3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzMDQxMzMsImV4cCI6MjA2Njg4MDEzM30.qRsUDDHSFuP6hIQZwv0mVsfS-ZZDPPbDU5Zl55Hoezw';
@@ -1620,6 +1663,7 @@ mcHintToggle.addEventListener('click', ()=>{
 
 
   
+
 
 
 
