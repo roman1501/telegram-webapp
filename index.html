@@ -973,15 +973,21 @@ const BOT_USERNAME = 'myfirstsupersmarttest_bot';
 const REF_REWARD = 150;
 
 // Кнопка "Запросити друга"
+// Кнопка "Запросити друга"
 document.getElementById('inviteBtn').addEventListener('click', () => {
-  // Використовуємо deep link, що одразу відкриває WebApp з параметром (надійніше для фронтенду)
-  const link = `https://t.me/${BOT_USERNAME}/app?startapp=ref_${userId}`;
+  const deepLink = `https://t.me/${BOT_USERNAME}/app?startapp=ref_${userId}`;
+  const text = `🔥 Greek House Tapper — залетай і забирай бонуси! Тицяй лінк і нам обом накапає по ${REF_REWARD} кліків:`;
+  
+  // Формуємо посилання для шарингу в Telegram
+  const shareLink = `https://t.me/share/url?url=${encodeURIComponent(deepLink)}&text=${encodeURIComponent(text)}`;
+
   if (Telegram?.WebApp?.openTelegramLink) {
-    Telegram.WebApp.openTelegramLink(link);
+    Telegram.WebApp.openTelegramLink(shareLink);
   } else {
-    window.open(link, '_blank');
+    window.open(shareLink, '_blank');
   }
 });
+
 
   const availableBonuses = [
     {
@@ -1813,6 +1819,7 @@ fetchUserData().then(async () => {
 
 
   
+
 
 
 
