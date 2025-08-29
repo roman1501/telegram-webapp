@@ -909,6 +909,19 @@ backdrop-filter: blur(10px);
 
   </div>
 </div>
+  <!-- Вибір варіанту для кальмара -->
+<div id="kalmarChoiceModal" style="display:none; position:fixed; inset:0; z-index:1500; background:rgba(0,0,0,.5); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:16px; padding:20px; max-width:90%; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,.3);">
+    <h3 style="margin-top:0">Обери варіант бонусу</h3>
+    <p style="margin:8px 0 16px">-50% на піту або гірос з кальмаром</p>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button id="btnKalmarPita" style="padding:10px 16px; border:none; border-radius:10px; background:#66bb6a; color:#fff; font-weight:700; cursor:pointer;">Піта з кальмаром</button>
+      <button id="btnKalmarGyros" style="padding:10px 16px; border:none; border-radius:10px; background:#66bb6a; color:#fff; font-weight:700; cursor:pointer;">Гірос з кальмаром</button>
+      <button id="btnKalmarCancel" style="padding:10px 16px; border:none; border-radius:10px; background:#e3e3e3; color:#333; cursor:pointer;">Скасувати</button>
+    </div>
+  </div>
+</div>
+
 <script>
   
   const tg = window.Telegram.WebApp;
@@ -993,6 +1006,20 @@ const happyHourEnd = 22;   // 18:00
       price: 850,
       image: "pytaTynez.jpg"
     },
+      {
+    name: "kalmarPyta",
+    title: "-50% на піту з кальмаром",
+    description: "Піта з кальмаром за пів ціни!",
+    price: 850,
+    image: "kalmarPytaGyros.jpg"
+  },
+  {
+    name: "kalmarGyros",
+    title: "-50% на гірос з кальмаром",
+    description: "Гірос з кальмаром за пів ціни!",
+    price: 850,
+    image: "kalmarPytaGyros.jpg"
+  },
   ];
 
 
@@ -1316,45 +1343,89 @@ confirmModal.style.display = "none";
     }
   }
 
-  function setupMarketButtons() {
-    const marketCards = document.querySelectorAll("#market-tab .bonus-card");
-    marketCards.forEach((card, index) => {
-      const btn = card.querySelector("button");
-      btn.addEventListener("click", async () => {
-        const bonus = availableBonuses[index];
-        if (clicks < bonus.price) {
-          alert(`Недостатньо кліків. Потрібно ${bonus.price}`);
-          return;
-        }
+function showKalmarChoice(onPick) {
+  const modal = document.getElementById('kalmarChoiceModal');
+  const btnPita = document.getElementById('btnKalmarPita');
+  const btnGyros = document.getElementById('btnKalmarGyros');
+  const btnCancel = document.getElementById('btnKalmarCancel');
 
-        clicks -= bonus.price;
-        updateDisplay();
-        await saveUserData();
+  const close = () => { modal.style.display = 'none';
+    btnPita.onclick = btnGyros.onclick = btnCancel.onclick = null;
+  };
 
-        const res = await fetch(`${supabaseUrl}/rest/v1/bonuses`, {
-          method: "POST",
-          headers: {
-            apikey: supabaseKey,
-            Authorization: `Bearer ${supabaseKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            name: bonus.name,
-            price: bonus.price,
-            used: false
-          })
-        });
+  btnPita.onclick = () => { close(); onPick('pita'); };
+  btnGyros.onclick = () => { close(); onPick('gyros'); };
+  btnCancel.onclick = close;
 
-        if (res.ok) {
-          alert(`🎁 Ви отримали бонус: ${bonus.title}`);
-          loadInventory();
-        } else {
-          alert("Помилка при збереженні бонусу.");
-        }
-      });
-    });
+  modal.style.display = 'flex';
+}
+
+async function purchaseBonus(bonusObj) {
+  // Перевірка балансу
+  if (clicks < bonusObj.price) {
+    alert(`Недостатньо кліків. Потрібно ${bonusObj.price}`);
+    return;
   }
+
+  // Списуємо і зберігаємо
+  clicks -= bonusObj.price;
+  updateDisplay();
+  await saveUserData();
+
+  // Зберігаємо бонус у таблицю 'bonuses'
+  const res = await fetch(`${supabaseUrl}/rest/v1/bonuses`, {
+    method: "POST",
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      name: bonusObj.name,   // важливо: збережеться kalmarPyta або kalmarGyros
+      price: bonusObj.price,
+      used: false
+    })
+  });
+
+  if (res.ok) {
+    alert(`🎁 Ви отримали бонус: ${bonusObj.title}`);
+    loadInventory();
+  } else {
+    alert("Помилка при збереженні бонусу.");
+  }
+}
+
+function setupMarketButtons() {
+  const marketCards = document.querySelectorAll("#market-tab .bonus-card");
+  marketCards.forEach((card, index) => {
+    const btn = card.querySelector("button");
+    btn.addEventListener("click", async () => {
+      const bonus = availableBonuses[index];
+
+      // 🔀 Особливий кейс для "кальмар"-бонусу з вибором:
+      if (bonus.name === 'kalmarPytaGyros') {
+        showKalmarChoice(async (variant) => {
+          // Отримуємо відповідний "конкретний" бонус
+          const chosen = variant === 'pita'
+            ? availableBonuses.find(b => b.name === 'kalmarPyta')
+            : availableBonuses.find(b => b.name === 'kalmarGyros');
+
+          if (!chosen) {
+            alert('Не знайдено обраний варіант бонусу.');
+            return;
+          }
+          await purchaseBonus(chosen);
+        });
+        return;
+      }
+
+      // ✅ Звичайна покупка для всіх інших бонусів
+      await purchaseBonus(bonus);
+    });
+  });
+}
+
 
   
 document.getElementById("tapBtn").addEventListener("click", (e) => {
@@ -1639,6 +1710,7 @@ mcHintToggle.addEventListener('click', ()=>{
 
 
   
+
 
 
 
