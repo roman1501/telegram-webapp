@@ -1316,7 +1316,8 @@ const payload =
   tg?.initDataUnsafe?.start_param ||
   new URLSearchParams(location.search).get('tgWebAppStartParam') ||
   new URLSearchParams(location.search).get('startapp') || '';
-
+  console.log("DEBUG payload =", payload); // 👈 додаємо для тесту
+  alert("Payload: " + payload);     
 
   if (!payload || !payload.startsWith('ref_')) return;
 
