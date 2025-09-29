@@ -1191,7 +1191,7 @@ async function checkDailyReward() {
   const data = await res.json();
   const lastRewardDate = data[0]?.last_claimed?.split('T')[0]; // Теж беремо тільки дату
   
-  if (true) {
+  if (false) {
       // showBlur();
     // Додати +100 кліків
     updateDisplay();
@@ -1262,8 +1262,56 @@ async function addClicksFor(targetUserId, amount) {
 }
 
 // Спробувати обробити реф-параметр і нарахувати бонус (один раз у житті користувача)
-async function handleReferralIfAny() {
+// async function handleReferralIfAny() {
   // Telegram кладе payload і сюди:
+//  const payload =
+//   tg?.initDataUnsafe?.start_param ||
+ //   new URLSearchParams(location.search).get('tgWebAppStartParam') || '';
+
+//  if (!payload || !payload.startsWith('ref_')) return;
+
+//  const referrerId = parseInt(payload.slice(4), 10);
+///  if (!referrerId || referrerId === userId) return; // сам себе не рефералиш 🙂
+
+  // Перевіряємо, чи вже є запис (щоб не нараховувати двічі)
+//  const checkRes = await fetch(
+//    `${supabaseUrl}/rest/v1/referrals?referrer_id=eq.${referrerId}&referree_id=eq.${userId}&select=id`,
+//    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+//  );
+//  const exists = await checkRes.json();
+//  if (Array.isArray(exists) && exists.length > 0) return;
+
+  // Спроба внести новий реферал (якщо unique по referree_id — другий раз не дасть)
+//  const ins = await fetch(`${supabaseUrl}/rest/v1/referrals`, {
+//    method: 'POST',
+  //  headers: {
+  //    apikey: supabaseKey,
+  //   Authorization: `Bearer ${supabaseKey}`,
+  //    'Content-Type': 'application/json',
+   //   'Prefer': 'return=representation'
+   // },
+    //body: JSON.stringify({ referrer_id: referrerId, referree_id: userId })
+// });
+
+//  if (!ins.ok) {
+    // Якщо вперлось у унікальність — означає, що реферал вже зарахований раніше
+//    return;
+//  }
+
+  // Нарахувати обом
+//  await addClicksFor(userId, REF_REWARD);
+//  await addClicksFor(referrerId, REF_REWARD);
+
+  // Оновити локальний UI (для поточного користувача)
+//  clicks += REF_REWARD;
+//  updateDisplay();
+
+  // Можна підморгнути хаптиком
+//  Telegram.WebApp?.HapticFeedback?.notificationOccurred('success');
+// }
+
+// 🚧 ТЕСТОВА версія: завжди дає бонус, якщо userId ≠ referrerId
+async function handleReferralIfAny() {
   const payload =
     tg?.initDataUnsafe?.start_param ||
     new URLSearchParams(location.search).get('tgWebAppStartParam') || '';
@@ -1271,44 +1319,20 @@ async function handleReferralIfAny() {
   if (!payload || !payload.startsWith('ref_')) return;
 
   const referrerId = parseInt(payload.slice(4), 10);
-  if (!referrerId || referrerId === userId) return; // сам себе не рефералиш 🙂
+  if (!referrerId || referrerId === userId) return;
 
-  // Перевіряємо, чи вже є запис (щоб не нараховувати двічі)
-  const checkRes = await fetch(
-    `${supabaseUrl}/rest/v1/referrals?referrer_id=eq.${referrerId}&referree_id=eq.${userId}&select=id`,
-    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-  );
-  const exists = await checkRes.json();
-  if (Array.isArray(exists) && exists.length > 0) return;
-
-  // Спроба внести новий реферал (якщо unique по referree_id — другий раз не дасть)
-  const ins = await fetch(`${supabaseUrl}/rest/v1/referrals`, {
-    method: 'POST',
-    headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify({ referrer_id: referrerId, referree_id: userId })
-  });
-
-  if (!ins.ok) {
-    // Якщо вперлось у унікальність — означає, що реферал вже зарахований раніше
-    return;
-  }
-
-  // Нарахувати обом
+  // 🔥 ПРОСТО завжди даємо бонус обом
   await addClicksFor(userId, REF_REWARD);
   await addClicksFor(referrerId, REF_REWARD);
 
-  // Оновити локальний UI (для поточного користувача)
+  // Оновлюємо локальний UI для поточного користувача
   clicks += REF_REWARD;
   updateDisplay();
 
-  // Можна підморгнути хаптиком
   Telegram.WebApp?.HapticFeedback?.notificationOccurred('success');
+  alert(`🎉 Тест: нараховано по ${REF_REWARD} кліків!\nРеферер: ${referrerId}, Ти: ${userId}`);
 }
+
 
 
 function closeDailyRewardModal() {
