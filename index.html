@@ -1310,30 +1310,74 @@ async function addClicksFor(targetUserId, amount) {
 //  Telegram.WebApp?.HapticFeedback?.notificationOccurred('success');
 // }
 
-// 🚧 ТЕСТОВА версія: завжди дає бонус, якщо userId ≠ referrerId
-async function handleReferralIfAny() {
-const payload =
-  tg?.initDataUnsafe?.start_param ||
-  new URLSearchParams(location.search).get('tgWebAppStartParam') ||
-  new URLSearchParams(location.search).get('startapp') || '';
-  console.log("DEBUG payload =", payload); // 👈 додаємо для тесту
-  alert("Payload: " + payload);     
+const TEST_MODE = false;   // для самоперевірки
+const DEBUG_MODE = true;  // для відлагодження
 
-  if (!payload || !payload.startsWith('ref_')) return;
+async function handleReferralIfAny() {
+  const payload =
+    tg?.initDataUnsafe?.start_param ||
+    new URLSearchParams(location.search).get('tgWebAppStartParam') ||
+    new URLSearchParams(location.search).get('startapp') || '';
+
+  if (DEBUG_MODE) alert("DEBUG payload = " + payload);
+
+  if (!payload || !payload.startsWith('ref_')) {
+    if (DEBUG_MODE) alert("ℹ️ Payload відсутній або некоректний");
+    return;
+  }
 
   const referrerId = parseInt(payload.slice(4), 10);
-  if (!referrerId || referrerId === userId) return;
+  if (!referrerId) {
+    if (DEBUG_MODE) alert("⛔ ReferrerId некоректний");
+    return;
+  }
 
-  // 🔥 ПРОСТО завжди даємо бонус обом
+  if (!TEST_MODE && referrerId === userId) {
+    if (DEBUG_MODE) alert("⛔ Сам себе не можна рефералити");
+    return;
+  }
+
+  // Перевіряємо, чи вже є запис
+  const checkRes = await fetch(
+    `${supabaseUrl}/rest/v1/referrals?referree_id=eq.${userId}&select=id`,
+    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+  );
+  const exists = await checkRes.json();
+  if (Array.isArray(exists) && exists.length > 0) {
+    if (DEBUG_MODE) alert("ℹ️ Реферал уже був зарахований раніше");
+    return;
+  }
+
+  const ins = await fetch(`${supabaseUrl}/rest/v1/referrals`, {
+    method: 'POST',
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify({ referrer_id: referrerId, referree_id: userId })
+  });
+
+  if (!ins.ok) {
+    if (DEBUG_MODE) alert("⚠️ Помилка при вставці рефералу");
+    return;
+  }
+
+  // ✅ Нараховуємо кліки обом
   await addClicksFor(userId, REF_REWARD);
   await addClicksFor(referrerId, REF_REWARD);
 
-  // Оновлюємо локальний UI для поточного користувача
   clicks += REF_REWARD;
   updateDisplay();
 
   Telegram.WebApp?.HapticFeedback?.notificationOccurred('success');
-  alert(`🎉 Тест: нараховано по ${REF_REWARD} кліків!\nРеферер: ${referrerId}, Ти: ${userId}`);
+
+  if (TEST_MODE) {
+    alert(`🎉 [TEST] Нараховано по ${REF_REWARD} кліків!\nРеферер: ${referrerId}, Ти: ${userId}`);
+  } else {
+    alert(`🎉 Тобі нараховано ${REF_REWARD} кліків за реферал!`);
+  }
 }
 
 
