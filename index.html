@@ -1312,9 +1312,11 @@ async function addClicksFor(targetUserId, amount) {
 
 // 🚧 ТЕСТОВА версія: завжди дає бонус, якщо userId ≠ referrerId
 async function handleReferralIfAny() {
-  const payload =
-    tg?.initDataUnsafe?.start_param ||
-    new URLSearchParams(location.search).get('tgWebAppStartParam') || '';
+const payload =
+  tg?.initDataUnsafe?.start_param ||
+  new URLSearchParams(location.search).get('tgWebAppStartParam') ||
+  new URLSearchParams(location.search).get('startapp') || '';
+
 
   if (!payload || !payload.startsWith('ref_')) return;
 
