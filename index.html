@@ -765,20 +765,23 @@ backdrop-filter: blur(10px);
     gap: 20px;
   }
 }
-/* рядок з ціною, кнопкою і лейблом праворуч */
+/* 1. Рівна сітка: ціна | (гнучко) | кнопка | лейбл */
 .bonus-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: max-content 1fr max-content max-content;
   align-items: center;
-  gap: 10px;
+  column-gap: 10px;
   margin-top: 8px;
+  width: 100%;
 }
 
-/* робимо так, щоб лейбл притискався вправо */
+/* запобігаємо переносу всередині лейблу і піджимаємо розмір якщо тісно */
 .bonus-row .expiry-label {
-  margin-left: auto;
-  color: #e86b6b;            /* світло-червоний */
+  margin-left: 0;                /* було auto у флексі — вже не треба */
+  white-space: nowrap;           /* ✨ ключ щоб "7 днів" не ламалось */
+  color: #e86b6b;
   font-weight: 700;
-  font-size: 14px;
+  font-size: clamp(12px, 3.5vw, 14px); /* трохи підлаштовується під ширину */
   background: #ffe9e9;
   border: 1px solid #ffd2d2;
   padding: 6px 10px;
@@ -789,14 +792,38 @@ backdrop-filter: blur(10px);
   gap: 6px;
   box-shadow: 0 1px 6px rgba(232,107,107,.15);
 }
+
 .expiry-label.expired {
   color: #8a8a8a;
   background: #f1f1f1;
   border-color: #e2e2e2;
 }
-/* ціна в рядку не повинна мати нижнього відступу */
-.bonus-row .bonus-price {
-  margin: 0;
+
+/* ціна в рядку — без зайвого нижнього відступу */
+.bonus-row .bonus-price { margin: 0; }
+
+/* 2. На дуже вузьких екранах (айфончики SE/старі андроїди):
+   кладемо лейбл на наступний рядок, вирівнюємо вправо */
+@media (max-width: 380px) {
+  .bonus-row {
+    grid-template-columns: max-content 1fr max-content;
+    grid-template-areas:
+      "price  .   button"
+      "label  label label";
+    row-gap: 6px;
+  }
+  .bonus-row .bonus-price { grid-area: price; }
+  .bonus-row button      { grid-area: button; justify-self: end; }
+  .bonus-row .expiry-label { 
+    grid-area: label; 
+    justify-self: end; 
+  }
+
+  /* трохи компактніша кнопка, щоб рідше переносити лейбл */
+  .bonus-card button {
+    padding: 10px 14px;
+    font-size: 15px;
+  }
 }
 
 
