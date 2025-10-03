@@ -911,6 +911,132 @@ backdrop-filter: blur(10px);
   }
 }
 
+/* ===== HOTFIX для карток ринку (TG WebApp mobile) ===== */
+
+/* Базова сітка всередині картки: img | title | desc | row */
+#market-tab .bonus-card{
+  display: grid;
+  grid-template-areas:
+    "img"
+    "title"
+    "desc"
+    "row";
+  gap: 10px;
+  padding: 14px !important; /* трохи компактніше */
+  border-radius: 16px;
+}
+
+/* Картинка у стабільному співвідношенні, не розтягується */
+#market-tab .bonus-card > img{
+  grid-area: img;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 0 !important;
+}
+
+/* Заголовок/опис — без зайвих відступів */
+#market-tab .bonus-title{
+  grid-area: title;
+  margin: 0 0 2px 0 !important;
+  font-size: 18px !important;
+  line-height: 1.15;
+}
+#market-tab .bonus-description{
+  grid-area: desc;
+  margin: 0 !important;
+  font-size: 14px !important;
+  color: #2f2f2f;
+}
+
+/* Рядок: ціна | (гнучкий простір) | кнопка | лейбл  */
+#market-tab .bonus-row{
+  grid-area: row;
+  display: grid;
+  grid-template-columns: max-content 1fr max-content max-content;
+  align-items: center;
+  column-gap: 8px;
+  margin-top: 6px !important;
+  width: 100%;
+}
+#market-tab .bonus-row > *{ min-width: 0; }           /* дозвіл стискатись */
+#market-tab .bonus-row .bonus-price{                   /* прибираємо нижній margin */
+  margin: 0 !important;
+  font-size: 16px !important;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Кнопка — компактніша, не роздуває рядок */
+#market-tab .bonus-card button{
+  padding: 10px 14px !important;
+  font-size: 15px !important;
+  border-radius: 10px !important;
+  white-space: nowrap;
+}
+
+/* Бейдж: максимум пів екрана, еліпсис якщо не влазить */
+#market-tab .expiry-label{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 45vw;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #e86b6b;
+  font-weight: 700;
+  font-size: clamp(12px, 3.4vw, 14px);
+  background: #ffe9e9;
+  border: 1px solid #ffd2d2;
+  padding: 6px 10px;
+  border-radius: 999px;
+  line-height: 1;
+  box-shadow: 0 1px 6px rgba(232,107,107,.15);
+}
+#market-tab .expiry-label .txt{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+#market-tab .expiry-label .icon{ flex: 0 0 auto; }
+#market-tab .expiry-label.expired{
+  color: #757575;
+  background: #f4f4f4;
+  border-color: #e7e7e7;
+}
+
+/* 🔻 Дуже вузькі екрани: переносимо бейдж під кнопку (у другий рядок) */
+@media (max-width: 380px){
+  #market-tab .bonus-row{
+    grid-template-columns: max-content 1fr max-content;
+    grid-template-areas:
+      "price  .   button"
+      "label  label label";
+    row-gap: 6px;
+  }
+  #market-tab .bonus-row .bonus-price{ grid-area: price; }
+  #market-tab .bonus-row button{ grid-area: button; justify-self: end; }
+  #market-tab .bonus-row .expiry-label{
+    grid-area: label;
+    justify-self: end;
+    max-width: 100%;
+  }
+}
+
+/* 🔻 Крайні тісні (маленькі вікна WebApp): ще компактніше */
+@media (max-width: 330px){
+  #market-tab .expiry-label{
+    font-size: 12px;
+    padding: 5px 8px;
+    max-width: 60vw;
+  }
+  #market-tab .bonus-card button{
+    padding: 9px 12px !important;
+    font-size: 14px !important;
+  }
+}
 
 
 
