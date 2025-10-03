@@ -765,6 +765,39 @@ backdrop-filter: blur(10px);
     gap: 20px;
   }
 }
+/* рядок з ціною, кнопкою і лейблом праворуч */
+.bonus-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* робимо так, щоб лейбл притискався вправо */
+.bonus-row .expiry-label {
+  margin-left: auto;
+  color: #e86b6b;            /* світло-червоний */
+  font-weight: 700;
+  font-size: 14px;
+  background: #ffe9e9;
+  border: 1px solid #ffd2d2;
+  padding: 6px 10px;
+  border-radius: 999px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 6px rgba(232,107,107,.15);
+}
+.expiry-label.expired {
+  color: #8a8a8a;
+  background: #f1f1f1;
+  border-color: #e2e2e2;
+}
+/* ціна в рядку не повинна мати нижнього відступу */
+.bonus-row .bonus-price {
+  margin: 0;
+}
 
 
 
@@ -970,58 +1003,80 @@ const happyHourEnd = 22;   // 18:00
       title: "-50% на гірос",
       description: "Смачна знижка на гірос у Greek House",
       price: 1000,
-      image: "gyros.jpeg"
+      image: "gyros.jpeg",
+      expiresAt: "2025-10-10"
     },
     {
       name: "bigPotato",
       title: "Велика картопля за 35 грн",
       description: "Обміняй кліки на хрустку картоплю!",
       price: 700,
-      image: "kartoplafrivelyka.jpeg"
+      image: "kartoplafrivelyka.jpeg",
+      expiresAt: "2025-10-10"
     },
     {
       name: "pitaGrylZChederom",
       title: "-50% на піту гриль з чедером",
       description: "Скуштуй улюблену піту в 2 рази дешевше!",
       price: 750,
-      image: "pitagrylichederini.png"
+      image: "pitagrylichederini.png",
+      expiresAt: "2025-10-10"
     },
     {
       name: "gyrosPlusRB",
       title: "Red Bull в подарунок до гіроса",
       description: "Береш гірос? Прихопи і Red Bull за 0 грн!",
       price: 950,
-      image: "gyrosPlusRB.png"
+      image: "gyrosPlusRB.png",
+      expiresAt: "2025-10-10"
     },
     {
       name: "kalmarPytaGyros",
       title: "-50% на піту або гірос з кальмаром",
       description: "240грн - задорого? Тоді тримай улюблену страву за 120грн!",
       price: 850,
-      image: "kalmarPytaGyros.jpg"
+      image: "kalmarPytaGyros.jpg",
+      expiresAt: "2025-10-10"
     },
     {
       name: "pytaTynez",
       title: "Нова піта з тунцем за пів ціни",
       description: "-50% на новинку, піту з тунцем!",
       price: 850,
-      image: "pytaTynez.jpg"
+      image: "pytaTynez.jpg",
+      expiresAt: "2025-10-10"
     },
       {
     name: "kalmarPyta",
     title: "-50% на піту з кальмаром",
     description: "Піта з кальмаром за пів ціни!",
     price: 850,
-    image: "kalmarPytaGyros.jpg"
+    image: "kalmarPytaGyros.jpg",
+    expiresAt: "2025-10-10"
   },
   {
     name: "kalmarGyros",
     title: "-50% на гірос з кальмаром",
     description: "Гірос з кальмаром за пів ціни!",
     price: 850,
-    image: "kalmarPytaGyros.jpg"
+    image: "kalmarPytaGyros.jpg",
+    expiresAt: "2025-10-10"
   },
   ];
+  
+function getDaysLeft(expireDate) {
+  const now = new Date();
+  const end = new Date(expireDate);
+  const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : 0;
+}
+function pluralDaysUa(n) {
+  const a = Math.abs(n) % 100, b = a % 10;
+  if (a > 10 && a < 20) return 'днів';
+  if (b > 1 && b < 5) return 'дні';
+  if (b === 1) return 'день';
+  return 'днів';
+}
 
 
 
@@ -1204,72 +1259,7 @@ async function checkDailyReward() {
 }
 
 
-async function handleReferralIfAny() {
-  const payload =
-    tg?.initDataUnsafe?.start_param ||
-    new URLSearchParams(location.search).get('tgWebAppStartParam') ||
-    new URLSearchParams(location.search).get('startapp') || '';
 
-  if (DEBUG_MODE) alert("DEBUG payload = " + payload);
-
-  if (!payload || !payload.startsWith('ref_')) {
-    if (DEBUG_MODE) alert("ℹ️ Payload відсутній або некоректний");
-    return;
-  }
-
-  const referrerId = parseInt(payload.slice(4), 10);
-  if (!referrerId) {
-    if (DEBUG_MODE) alert("⛔ ReferrerId некоректний");
-    return;
-  }
-
-  if (!TEST_MODE && referrerId === userId) {
-    if (DEBUG_MODE) alert("⛔ Сам себе не можна рефералити");
-    return;
-  }
-
-  // Перевіряємо, чи вже є запис
-  const checkRes = await fetch(
-    `${supabaseUrl}/rest/v1/referrals?referree_id=eq.${userId}&select=id`,
-    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-  );
-  const exists = await checkRes.json();
-  if (Array.isArray(exists) && exists.length > 0) {
-    if (DEBUG_MODE) alert("ℹ️ Реферал уже був зарахований раніше");
-    return;
-  }
-
-  const ins = await fetch(`${supabaseUrl}/rest/v1/referrals`, {
-    method: 'POST',
-    headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify({ referrer_id: referrerId, referree_id: userId })
-  });
-
-  if (!ins.ok) {
-    if (DEBUG_MODE) alert("⚠️ Помилка при вставці рефералу");
-    return;
-  }
-
-  // ✅ Нараховуємо кліки обом
-  await addClicksFor(userId, REF_REWARD);
-  await addClicksFor(referrerId, REF_REWARD);
-
-  clicks += REF_REWARD;
-  updateDisplay();
-
-  Telegram.WebApp?.HapticFeedback?.notificationOccurred('success');
-
-  if (TEST_MODE) {
-    alert(`🎉 [TEST] Нараховано по ${REF_REWARD} кліків!\nРеферер: ${referrerId}, Ти: ${userId}`);
-  } else {
-    alert(`🎉 Тобі нараховано ${REF_REWARD} кліків за реферал!`);
-  }
-}
 
 
 
@@ -1468,15 +1458,57 @@ async function purchaseBonus(bonusObj) {
 
 function setupMarketButtons() {
   const marketCards = document.querySelectorAll("#market-tab .bonus-card");
-  marketCards.forEach((card, index) => {
-    const btn = card.querySelector("button");
-    btn.addEventListener("click", async () => {
-      const bonus = availableBonuses[index];
 
-      // 🔀 Особливий кейс для "кальмар"-бонусу з вибором:
+  marketCards.forEach((card, index) => {
+    // не дублюємо рядок при повторному виклику
+    if (card.dataset.rowWired === "1") return;
+    card.dataset.rowWired = "1";
+
+    const btn = card.querySelector("button");
+    const priceEl = card.querySelector(".bonus-price");
+    const descEl = card.querySelector(".bonus-description");
+    const bonus = availableBonuses[index]; // важливо отримати bonus на старті
+
+    // (опційно) якщо priceEl не знайдено, створимо, щоб верстка не ламалась
+    if (!priceEl) {
+      const fallbackPrice = document.createElement("div");
+      fallbackPrice.className = "bonus-price";
+      fallbackPrice.textContent = `${bonus?.price ?? '-'} кліків`;
+      card.insertBefore(fallbackPrice, btn);
+    }
+
+    // створюємо лейбл тільки якщо є expiresAt
+    let labelEl = null;
+    if (bonus?.expiresAt) {
+      const daysLeft = getDaysLeft(bonus.expiresAt);
+      labelEl = document.createElement("span");
+      labelEl.className = "expiry-label" + (daysLeft > 0 ? "" : " expired");
+      labelEl.innerHTML = daysLeft > 0
+        ? `⏰ ${daysLeft} ${pluralDaysUa(daysLeft)}`
+        : `⛔ Закінчилась`;
+    }
+
+    // будуємо єдиний рядок: ЦІНА + КНОПКА + (опціонально) ЛЕЙБЛ
+    const row = document.createElement("div");
+    row.className = "bonus-row";
+
+    // переносимо існуючі елементи в рядок
+    const priceNode = card.querySelector(".bonus-price");
+    row.appendChild(priceNode);
+    row.appendChild(btn);
+    if (labelEl) row.appendChild(labelEl);
+
+    // вставляємо рядок після опису
+    if (descEl && descEl.nextSibling) {
+      card.insertBefore(row, descEl.nextSibling);
+    } else {
+      card.appendChild(row);
+    }
+
+    // обробник кнопки покупки
+    btn.addEventListener("click", async () => {
       if (bonus.name === 'kalmarPytaGyros') {
         showKalmarChoice(async (variant) => {
-          // Отримуємо відповідний "конкретний" бонус
           const chosen = variant === 'pita'
             ? availableBonuses.find(b => b.name === 'kalmarPyta')
             : availableBonuses.find(b => b.name === 'kalmarGyros');
@@ -1489,12 +1521,25 @@ function setupMarketButtons() {
         });
         return;
       }
-
-      // ✅ Звичайна покупка для всіх інших бонусів
       await purchaseBonus(bonus);
     });
   });
 }
+setInterval(() => {
+  document.querySelectorAll("#market-tab .bonus-card").forEach((card, index) => {
+    const bonus = availableBonuses[index];
+    if (!bonus?.expiresAt) return;
+
+    const label = card.querySelector(".expiry-label");
+    if (!label) return;
+
+    const d = getDaysLeft(bonus.expiresAt);
+    label.classList.toggle("expired", d <= 0);
+    label.innerHTML = d > 0 ? `⏰ ${d} ${pluralDaysUa(d)}` : `⛔ Закінчилась`;
+  });
+}, 60 * 60 * 1000); // оновлюємо щогодини
+
+
 
 
   
