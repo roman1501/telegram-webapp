@@ -784,10 +784,6 @@ backdrop-filter: blur(10px);
 <div class="welcome-block">
     <img src="logo.jfif" alt="Greek House logo" class="logo">
   <h2 class="section-heading">Привіт, <span id="username">...</span>!</h2>
-    <!-- 👇 НОВА КНОПКА -->
-  <button id="inviteBtn" style="margin-top:10px; padding:10px 16px; border:none; border-radius:12px; background:#66bb6a; color:#fff; font-weight:700; cursor:pointer;">
-    Запросити друга
-  </button>
 </div>
         <div class="counter" id="counter">Завантаження...</div>
     <div id="happyHourTimer" style="margin-top: 10px; font-size: 18px; color: #fff; background: #66bb6a; padding: 8px 16px; border-radius: 12px; display: none;">
@@ -967,27 +963,6 @@ tg.ready();
     const happyHourStart = 21; // 17:00
 const happyHourEnd = 22;   // 18:00
   // 👇 заміни на свій юзернейм бота
-const BOT_USERNAME = 'myfirstsupersmarttest_bot';
-
-// Скільки кліків давати обом за реферал (налаштовується)
-const REF_REWARD = 150;
-
-// Кнопка "Запросити друга"
-// Кнопка "Запросити друга"
-document.getElementById('inviteBtn').addEventListener('click', () => {
-  const deepLink = `https://t.me/${BOT_USERNAME}/app?startapp=ref_${userId}`;
-  const text = `🔥 Greek House Tapper — залетай і забирай бонуси! Тицяй лінк і нам обом накапає по ${REF_REWARD} кліків:`;
-  
-  // Формуємо посилання для шарингу в Telegram
-  const shareLink = `https://t.me/share/url?url=${encodeURIComponent(deepLink)}&text=${encodeURIComponent(text)}`;
-
-  if (Telegram?.WebApp?.openTelegramLink) {
-    Telegram.WebApp.openTelegramLink(shareLink);
-  } else {
-    window.open(shareLink, '_blank');
-  }
-});
-
 
   const availableBonuses = [
     {
@@ -1227,91 +1202,7 @@ async function checkDailyReward() {
        // setTimeout(() => hideBlur(), 300);
   }
 }
-// Додати N кліків конкретному user_id (створить запис, якщо нема)
-async function addClicksFor(targetUserId, amount) {
-  // 1) прочитати
-  const getRes = await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${targetUserId}&select=clicks`, {
-    headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
-  });
-  const arr = await getRes.json();
 
-  if (!Array.isArray(arr) || arr.length === 0) {
-    // 2a) нема запису — створюємо
-    await fetch(`${supabaseUrl}/rest/v1/clicks`, {
-      method: 'POST',
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ user_id: targetUserId, clicks: amount })
-    });
-  } else {
-    // 2b) є запис — інкремент
-    const current = Number(arr[0].clicks) || 0;
-    await fetch(`${supabaseUrl}/rest/v1/clicks?user_id=eq.${targetUserId}`, {
-      method: 'PATCH',
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ clicks: current + amount })
-    });
-  }
-}
-
-// Спробувати обробити реф-параметр і нарахувати бонус (один раз у житті користувача)
-// async function handleReferralIfAny() {
-  // Telegram кладе payload і сюди:
-//  const payload =
-//   tg?.initDataUnsafe?.start_param ||
- //   new URLSearchParams(location.search).get('tgWebAppStartParam') || '';
-
-//  if (!payload || !payload.startsWith('ref_')) return;
-
-//  const referrerId = parseInt(payload.slice(4), 10);
-///  if (!referrerId || referrerId === userId) return; // сам себе не рефералиш 🙂
-
-  // Перевіряємо, чи вже є запис (щоб не нараховувати двічі)
-//  const checkRes = await fetch(
-//    `${supabaseUrl}/rest/v1/referrals?referrer_id=eq.${referrerId}&referree_id=eq.${userId}&select=id`,
-//    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-//  );
-//  const exists = await checkRes.json();
-//  if (Array.isArray(exists) && exists.length > 0) return;
-
-  // Спроба внести новий реферал (якщо unique по referree_id — другий раз не дасть)
-//  const ins = await fetch(`${supabaseUrl}/rest/v1/referrals`, {
-//    method: 'POST',
-  //  headers: {
-  //    apikey: supabaseKey,
-  //   Authorization: `Bearer ${supabaseKey}`,
-  //    'Content-Type': 'application/json',
-   //   'Prefer': 'return=representation'
-   // },
-    //body: JSON.stringify({ referrer_id: referrerId, referree_id: userId })
-// });
-
-//  if (!ins.ok) {
-    // Якщо вперлось у унікальність — означає, що реферал вже зарахований раніше
-//    return;
-//  }
-
-  // Нарахувати обом
-//  await addClicksFor(userId, REF_REWARD);
-//  await addClicksFor(referrerId, REF_REWARD);
-
-  // Оновити локальний UI (для поточного користувача)
-//  clicks += REF_REWARD;
-//  updateDisplay();
-
-  // Можна підморгнути хаптиком
-//  Telegram.WebApp?.HapticFeedback?.notificationOccurred('success');
-// }
-
-const TEST_MODE = false;   // для самоперевірки
-const DEBUG_MODE = true;  // для відлагодження
 
 async function handleReferralIfAny() {
   const payload =
@@ -1880,7 +1771,6 @@ mcHintToggle.addEventListener('click', ()=>{
 fetchUserData().then(async () => {
   setupMarketButtons();
   loadInventory();
-  await handleReferralIfAny();  // ✅ тепер можна await
 });
 </script>
 
