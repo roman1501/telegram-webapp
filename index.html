@@ -825,6 +825,91 @@ backdrop-filter: blur(10px);
     font-size: 15px;
   }
 }
+/* сітка залишається як ти зробив раніше */
+.bonus-row {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content max-content;
+  align-items: center;
+  column-gap: 10px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* ключ: дозволяємо дітям стискатися в гріді */
+.bonus-row > * { min-width: 0; }
+
+/* ціна в рядку — без зайвого нижнього відступу */
+.bonus-row .bonus-price { margin: 0; }
+
+/* бейдж: максимум пів екрана, обрізання тексту, іконка окремо */
+.bonus-row .expiry-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 45vw;            /* ✨ не дамо вилізти за пів ширини */
+  overflow: hidden;           /* обрізаємо вміст, якщо не влазить */
+  white-space: nowrap;        /* в один рядок на нормальних екранах */
+  text-overflow: ellipsis;    /* додаємо … */
+  color: #e86b6b;
+  font-weight: 700;
+  font-size: clamp(12px, 3.5vw, 14px);
+  background: #ffe9e9;
+  border: 1px solid #ffd2d2;
+  padding: 6px 10px;
+  border-radius: 999px;
+  line-height: 1;
+  box-shadow: 0 1px 6px rgba(232,107,107,.15);
+}
+
+/* внутрішній текст отримує еліпсис, іконка не стискається */
+.expiry-label .txt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.expiry-label .icon {
+  flex: 0 0 auto;
+}
+
+/* сірий стиль для прострочених */
+.expiry-label.expired {
+  color: #8a8a8a;
+  background: #f1f1f1;
+  border-color: #e2e2e2;
+}
+
+/* на дуже вузьких екранах — переносимо бейдж на другий рядок */
+@media (max-width: 380px) {
+  .bonus-row {
+    grid-template-columns: max-content 1fr max-content;
+    grid-template-areas:
+      "price  .   button"
+      "label  label label";
+    row-gap: 6px;
+  }
+  .bonus-row .bonus-price { grid-area: price; }
+  .bonus-row button      { grid-area: button; justify-self: end; }
+  .bonus-row .expiry-label { 
+    grid-area: label; 
+    justify-self: end; 
+    max-width: 100%;        /* тут можна розтягнутися */
+    white-space: nowrap;    /* лишаємо еліпсис на один рядок */
+  }
+
+  /* компактніша кнопка, щоб рідше тиснула сітку */
+  .bonus-card button {
+    padding: 10px 14px;
+    font-size: 15px;
+  }
+}
+
+/* зовсім тісно? ще стиснемо шрифт і падинги */
+@media (max-width: 330px) {
+  .bonus-row .expiry-label {
+    font-size: 12px;
+    padding: 5px 8px;
+    max-width: 60vw;
+  }
+}
 
 
 
@@ -1506,14 +1591,14 @@ function setupMarketButtons() {
 
     // створюємо лейбл тільки якщо є expiresAt
     let labelEl = null;
-    if (bonus?.expiresAt) {
-      const daysLeft = getDaysLeft(bonus.expiresAt);
-      labelEl = document.createElement("span");
-      labelEl.className = "expiry-label" + (daysLeft > 0 ? "" : " expired");
-      labelEl.innerHTML = daysLeft > 0
-        ? `⏰ ${daysLeft} ${pluralDaysUa(daysLeft)}`
-        : `⛔ Закінчилась`;
-    }
+if (bonus?.expiresAt) {
+  const daysLeft = getDaysLeft(bonus.expiresAt);
+  labelEl = document.createElement("span");
+  labelEl.className = "expiry-label" + (daysLeft > 0 ? "" : " expired");
+  labelEl.innerHTML = daysLeft > 0
+    ? `<span class="icon">⏰</span><span class="txt">${daysLeft} ${pluralDaysUa(daysLeft)}</span>`
+    : `<span class="icon">⛔</span><span class="txt">Закінчилась</span>`;
+}
 
     // будуємо єдиний рядок: ЦІНА + КНОПКА + (опціонально) ЛЕЙБЛ
     const row = document.createElement("div");
