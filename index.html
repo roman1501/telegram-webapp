@@ -143,6 +143,30 @@ body{font-family:'Segoe UI',sans-serif;margin:0;padding:0;display:flex;flex-dire
   border-radius: 12px;
   margin: 0;
 }
+/* 1) Фікс кліків у модалці підтвердження */
+#confirmModal{ z-index: 2000; } /* вище за інші */
+#confirmModal::before{
+  z-index: -1;            /* повертаємо за модалку */
+  pointer-events: none;   /* на всяк: не перехоплює кліки */
+}
+#confirmModal .modal-box{ position: relative; z-index: 1; }
+
+/* 2) Повертаємо стилі кнопки "Активувати" в інвентарі */
+#inventory-tab .bonus-card button{
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  background: var(--accent-green);
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  transition: transform .1s, background .3s;
+}
+#inventory-tab .bonus-card button:active{ transform: scale(.96); }
+
+/* 3) На ринку стилі як було: (залишаємо вузьке вирівнювання під ціною) */
+#market-tab .bonus-left{ align-items: flex-start; }
+#market-tab .bonus-card button{ align-self: flex-start; }
 
   </style>
 </head>
