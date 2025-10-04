@@ -167,6 +167,24 @@ body{font-family:'Segoe UI',sans-serif;margin:0;padding:0;display:flex;flex-dire
 /* 3) На ринку стилі як було: (залишаємо вузьке вирівнювання під ціною) */
 #market-tab .bonus-left{ align-items: flex-start; }
 #market-tab .bonus-card button{ align-self: flex-start; }
+/* Кнопка заблокована (бонус закінчився) */
+.bonus-card button.expired-btn,
+.bonus-card button:disabled {
+  background: #999 !important;
+  color: #eee !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  filter: grayscale(100%) brightness(0.9);
+  transition: all 0.2s ease;
+}
+
+/* Напівпрозорий hover — залишає чіткий “заборонений” ефект */
+.bonus-card button.expired-btn:hover,
+.bonus-card button:disabled:hover {
+  transform: none;
+  filter: grayscale(100%) brightness(0.8);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
 
   </style>
 </head>
@@ -875,6 +893,11 @@ function setupMarketButtons() {
     } else {
       card.appendChild(row);
     }
+// Якщо бонус прострочений — блокуємо
+if (bonus?.expiresAt && getDaysLeft(bonus.expiresAt) <= 0) {
+  btn.disabled = true;
+  btn.classList.add("expired-btn");
+}
 
     // Клік "Отримати"
     btn.addEventListener("click", async () => {
