@@ -1038,6 +1038,80 @@ backdrop-filter: blur(10px);
   }
 }
 
+/* ===== Новий лейаут для рядка в картці (мобайл-first) ===== */
+#market-tab .bonus-row{
+  display: grid;
+  grid-template-columns: 1fr max-content; /* ліворуч: вертикальна колонка; праворуч: бейдж */
+  align-items: center;
+  column-gap: 10px;
+  margin-top: 6px !important;
+  width: 100%;
+}
+
+#market-tab .bonus-row > *{ min-width: 0; }
+
+/* Ліва колонка: спочатку ціна, нижче кнопка */
+#market-tab .bonus-left{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* кнопка лишається біля ціни */
+  gap: 8px;
+}
+
+/* Підчищаємо стиль ціни і кнопки під мобайл */
+#market-tab .bonus-row .bonus-price{
+  margin: 0 !important;
+  font-size: 16px !important;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+#market-tab .bonus-card button{
+  padding: 10px 14px !important;
+  font-size: 15px !important;
+  border-radius: 10px !important;
+  white-space: nowrap;
+}
+
+/* Праворуч – бейдж строку дії */
+#market-tab .expiry-label{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 42vw;            /* щоб не зламав рядок */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #e86b6b;
+  font-weight: 700;
+  font-size: clamp(12px, 3.4vw, 14px);
+  background: #ffe9e9;
+  border: 1px solid #ffd2d2;
+  padding: 6px 10px;
+  border-radius: 999px;
+  line-height: 1;
+  box-shadow: 0 1px 6px rgba(232,107,107,.15);
+}
+#market-tab .expiry-label .txt{ overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#market-tab .expiry-label .icon{ flex: 0 0 auto; }
+#market-tab .expiry-label.expired{
+  color: #757575;
+  background: #f4f4f4;
+  border-color: #e7e7e7;
+}
+
+/* Дуже вузькі екрани — трішки компактніше */
+@media (max-width: 330px){
+  #market-tab .expiry-label{
+    font-size: 12px;
+    padding: 5px 8px;
+    max-width: 55vw;
+  }
+  #market-tab .bonus-card button{
+    padding: 9px 12px !important;
+    font-size: 14px !important;
+  }
+}
 
 
   </style>
@@ -1698,16 +1772,15 @@ function setupMarketButtons() {
   const marketCards = document.querySelectorAll("#market-tab .bonus-card");
 
   marketCards.forEach((card, index) => {
-    // не дублюємо рядок при повторному виклику
     if (card.dataset.rowWired === "1") return;
     card.dataset.rowWired = "1";
 
     const btn = card.querySelector("button");
     const priceEl = card.querySelector(".bonus-price");
     const descEl = card.querySelector(".bonus-description");
-    const bonus = availableBonuses[index]; // важливо отримати bonus на старті
+    const bonus = availableBonuses[index];
 
-    // (опційно) якщо priceEl не знайдено, створимо, щоб верстка не ламалась
+    // Якщо price немає — підстрахуємось
     if (!priceEl) {
       const fallbackPrice = document.createElement("div");
       fallbackPrice.className = "bonus-price";
@@ -1715,35 +1788,41 @@ function setupMarketButtons() {
       card.insertBefore(fallbackPrice, btn);
     }
 
-    // створюємо лейбл тільки якщо є expiresAt
+    // Створюємо бейдж (якщо є дедлайн)
     let labelEl = null;
-if (bonus?.expiresAt) {
-  const daysLeft = getDaysLeft(bonus.expiresAt);
-  labelEl = document.createElement("span");
-  labelEl.className = "expiry-label" + (daysLeft > 0 ? "" : " expired");
-  labelEl.innerHTML = daysLeft > 0
-    ? `<span class="icon">⏰</span><span class="txt">${daysLeft} ${pluralDaysUa(daysLeft)}</span>`
-    : `<span class="icon">⛔</span><span class="txt">Закінчилась</span>`;
-}
+    if (bonus?.expiresAt) {
+      const daysLeft = getDaysLeft(bonus.expiresAt);
+      labelEl = document.createElement("span");
+      labelEl.className = "expiry-label" + (daysLeft > 0 ? "" : " expired");
+      labelEl.innerHTML = daysLeft > 0
+        ? `<span class="icon">⏰</span><span class="txt">${daysLeft} ${pluralDaysUa(daysLeft)}</span>`
+        : `<span class="icon">⛔</span><span class="txt">Закінчилась</span>`;
+    }
 
-    // будуємо єдиний рядок: ЦІНА + КНОПКА + (опціонально) ЛЕЙБЛ
+    // НОВА структура:
+    // bonus-row: [ bonus-left | expiry-label ]
+    // bonus-left: price (рядок "** кліків"), нижче — кнопка "Отримати"
     const row = document.createElement("div");
     row.className = "bonus-row";
 
-    // переносимо існуючі елементи в рядок
-    const priceNode = card.querySelector(".bonus-price");
-    row.appendChild(priceNode);
-    row.appendChild(btn);
+    const leftCol = document.createElement("div");
+    leftCol.className = "bonus-left";
+
+    const priceNode = card.querySelector(".bonus-price"); // існуючий вузол
+    leftCol.appendChild(priceNode);
+    leftCol.appendChild(btn);
+
+    row.appendChild(leftCol);
     if (labelEl) row.appendChild(labelEl);
 
-    // вставляємо рядок після опису
+    // Вставляємо новий рядок одразу після опису
     if (descEl && descEl.nextSibling) {
       card.insertBefore(row, descEl.nextSibling);
     } else {
       card.appendChild(row);
     }
 
-    // обробник кнопки покупки
+    // Клік "Отримати"
     btn.addEventListener("click", async () => {
       if (bonus.name === 'kalmarPytaGyros') {
         showKalmarChoice(async (variant) => {
@@ -1763,6 +1842,7 @@ if (bonus?.expiresAt) {
     });
   });
 }
+
 setInterval(() => {
   document.querySelectorAll("#market-tab .bonus-card").forEach((card, index) => {
     const bonus = availableBonuses[index];
