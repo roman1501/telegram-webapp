@@ -131,6 +131,19 @@ body{font-family:'Segoe UI',sans-serif;margin:0;padding:0;display:flex;flex-dire
   .ingredients{grid-template-columns:repeat(2,minmax(72px,1fr));gap:12px}
   .ingredient img{width:44px;height:44px}
 }
+/* Показувати повне зображення, висота змінна від оригіналу */
+#market-tab .bonus-card > img,
+#inventory-tab .bonus-card > img,
+.bonus-card > img{
+  width: 100%;
+  height: auto !important;      /* скасовуємо фіксовану висоту */
+  aspect-ratio: auto !important;/* скасовуємо 16/9 */
+  object-fit: contain;          /* гарантія, що нічого не ріже */
+  display: block;
+  border-radius: 12px;
+  margin: 0;
+}
+
   </style>
 </head>
 <body>
