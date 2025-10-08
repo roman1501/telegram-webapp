@@ -1,0 +1,183 @@
+/* ===== Base / reset ===== */
+:root{--main-green:#004d00;--accent-green:#43a047;--light-green:#66bb6a;--dark-green:#2e7d32;--card-bg:#f5f5f5;}
+:where(html,body,*){box-sizing:border-box;user-select:none;-webkit-user-select:none}
+body{font-family:'Segoe UI',sans-serif;margin:0;padding:0;display:flex;flex-direction:column;height:100vh;background:linear-gradient(to bottom,var(--main-green),#fff);animation:fadeIn 1s ease-in}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ===== Tapper visuals ===== */
+.coin-fly{position:fixed;width:24px;height:24px;background:url("greenCoin.png") center/contain no-repeat;pointer-events:none;z-index:9999;animation:flyToCounter 1s ease-out forwards}
+@keyframes flyToCounter{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+.section-heading{position:relative;display:inline-block;margin-bottom:8px;padding:12px 20px;border-radius:20px;font-weight:700;color:#003300;background:linear-gradient(145deg,rgba(202,255,179,.85) 40%,rgba(202,255,179,.3) 80%,rgba(202,255,179,0) 100%);box-shadow:0 8px 16px rgba(0,0,0,.06);overflow:hidden}
+.section-heading::before{content:"";position:absolute;inset:-30% auto auto -30%;width:160%;height:160%;border-radius:50%;background:conic-gradient(from 90deg,rgba(202,255,179,.12),rgba(202,255,179,.05),rgba(202,255,179,.1),rgba(202,255,179,.02),transparent,rgba(202,255,179,.08));opacity:.7;mix-blend-mode:soft-light;pointer-events:none}
+.tap-coin{width:145px;height:145px;border-radius:50%;margin:16px auto 8px;cursor:pointer;display:block;background:transparent;border:0;padding:0;transition:transform .15s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tap-coin.rotated{transform:rotate(-5deg)}
+.tap-coin img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.tap-coin.active{transform:scale(1.05);filter:brightness(1.1)}
+.plus-one{position:absolute;color:#fff;text-shadow:0 0 6px rgba(0,0,0,.4);font:700 24px/1 sans-serif;animation:floatUp .8s ease forwards;pointer-events:none;z-index:999;filter:drop-shadow(0 0 4px #000)}
+@keyframes floatUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-40px)}}
+
+/* ===== Layout / tabs ===== */
+.tab-content{flex:1;padding:20px;display:none;text-align:center;overflow-y:auto;animation:slideIn .3s ease}
+.tab-content.active{display:block}
+.tab-bar{display:flex;height:60px;background:var(--main-green);border-top:2px solid var(--dark-green);box-shadow:0 -3px 10px rgba(0,0,0,.2)}
+.tab-button{flex:1;font-size:18px;padding:10px;cursor:pointer;border:0;background:0;color:#fff;font-weight:700;transition:background .3s}
+.tab-button:hover{background:rgba(255,255,255,.1)}
+.tab-button.active{background:var(--light-green)}
+.counter{margin-top:20px;font-size:24px;color:#000;animation:pulse 1s infinite alternate ease-in-out}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.05)}}
+.logo{width:100px;margin:10px auto;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.gyros-img,.bonus-img{max-width:100%;margin-top:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.2)}
+
+/* ===== Cards (market/inventory) ===== */
+.bonus-list{display:flex;flex-direction:column;gap:20px}
+.bonus-card{background:var(--card-bg);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(0,0,0,.15);text-align:left;transition:transform .2s;display:grid;grid-template-areas:"img" "title" "desc" "row";gap:10px}
+.bonus-card:hover{transform:scale(1.02)}
+.bonus-card img{grid-area:img;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;margin:0}
+.bonus-title{grid-area:title;margin:0 0 2px;font-size:18px;line-height:1.15;color:var(--dark-green);font-weight:700}
+.bonus-description{grid-area:desc;margin:0;font-size:14px;color:#2f2f2f}
+.bonus-price{font-size:16px;color:#000;font-weight:700;line-height:1;white-space:nowrap;margin:0}
+.bonus-card.used{opacity:.6;filter:grayscale(60%)}
+
+/* ===== Market row: "price" over "button" (left) + expiry badge (right) ===== */
+#market-tab .bonus-row{grid-area:row;display:grid;grid-template-columns:1fr max-content;align-items:center;column-gap:14px;margin-top:6px;width:100%}
+#market-tab .bonus-row>*{min-width:0}
+#market-tab .bonus-left{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+#market-tab .bonus-card button{align-self:flex-start;margin-left:0;padding:10px 14px;font-size:15px;border:0;border-radius:10px;background:var(--accent-green);color:#fff;cursor:pointer;white-space:nowrap;transition:background .3s,transform .1s}
+#market-tab .bonus-card button:active{transform:scale(.96)}
+#market-tab .expiry-label{padding:8px 12px;display:inline-flex;align-items:center;gap:6px;max-width:42vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#e86b6b;font-weight:700;font-size:15px;background:#ffe9e9;border:1px solid #ffd2d2;padding:6px 10px;border-radius:999px;line-height:1;box-shadow:0 1px 6px rgba(232,107,107,.15)}
+#market-tab .expiry-label .txt{overflow:hidden;text-overflow:ellipsis;min-width:0}
+#market-tab .expiry-label .icon{flex:0 0 auto}
+#market-tab .expiry-label.expired{color:#757575;background:#f4f4f4;border-color:#e7e7e7}
+@media (max-width:330px){
+  #market-tab .expiry-label{font-size:12px;padding:5px 8px;max-width:55vw}
+  #market-tab .bonus-card button{padding:9px 12px;font-size:14px}
+}
+
+/* ===== Happy hour ===== */
+#happyHourTimer{max-width:330px;margin:10px auto;text-align:center;padding:6px 12px;border-radius:16px;background:rgba(202,255,179,.35);font-weight:600;font-size:14px;line-height:1.4;overflow:hidden}
+
+/* ===== Modals (confirm / daily reward / fortune) ===== */
+#confirmModal,#dailyRewardModal,.fortune-modal{display:none;position:fixed;inset:0;z-index:999;justify-content:center;align-items:center}
+#confirmModal{background:rgba(0,0,0,.6);animation:fadeIn .3s ease}
+#confirmModal.active::before{content:"";position:fixed;inset:0;background:rgba(255,255,255,.05)}
+#confirmModal .modal-box{background:#fff;padding:24px;border-radius:16px;max-width:90%;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.3);animation:slideIn .4s ease}
+#confirmModal p{font-size:18px;color:#333}
+#confirmActivate{background:var(--accent-green);color:#fff}
+#cancelActivate{background:#ccc;color:#333}
+#confirmModal button{padding:12px 24px;margin:10px 8px 0;border:0;border-radius:10px;font-size:16px;cursor:pointer}
+
+#dailyRewardModal{background:rgba(0,0,0,.4)}
+#dailyRewardBlur{position:fixed;inset:0;z-index:998;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);background:rgba(255,255,255,.05);opacity:0;pointer-events:none;transition:opacity .3s}
+#dailyRewardBlur.active{opacity:1;pointer-events:auto}
+.daily-reward-box{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:32px 24px;border-radius:20px;max-width:90%;text-align:center;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.25);background-image:radial-gradient(circle at top left,rgba(202,255,179,.3),rgba(255,255,255,.05));animation:fadeInModal .3s ease-out}
+@keyframes fadeInModal{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.daily-reward-box h3{font-size:22px;margin:0 0 10px;color:#eaffea;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.daily-reward-box p{font-size:18px;margin:0 0 20px;text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.daily-reward-box button{padding:10px 24px;background:linear-gradient(to right,#66bb6a,#99d699);color:#fff;border:0;border-radius:12px;font:700 16px/1 sans-serif;cursor:pointer;transition:.2s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.daily-reward-box button:hover{background:linear-gradient(to right,#7ddc7d,#b4e8b4)}
+
+.fortune-btn{position:fixed;top:32px;right:28px;z-index:100;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#000 60%,#1E1E1E 100%);border:0;border-radius:50%;box-shadow:0 2px 18px 2px #ffe06655;padding:14px;cursor:pointer;transition:box-shadow .2s,transform .12s}
+.fortune-btn:hover{box-shadow:0 2px 26px 8px #ffe06677;transform:scale(1.10)}
+.fortune-modal{z-index:2000;background:rgba(96,96,96,.10);backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px);animation:fadeIn .33s}
+.fortune-modal-content{position:relative;background:rgba(255,255,255,.78);border-radius:28px;padding:36px 24px 24px;max-width:95vw;max-height:90dvh;width:min(520px,95vw);box-shadow:0 6px 32px #00884a28,0 2px 18px #0002;text-align:center;animation:fortuneAppear .22s cubic-bezier(.18,.78,.61,1.09);border:1.5px solid #d3ffe2;display:flex;flex-direction:column;overflow:hidden}
+@keyframes fortuneAppear{from{transform:scale(.97) translateY(28px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.fortune-close-btn{position:absolute;top:14px;right:18px;background:rgba(44,197,125,.12);border:0;font-size:26px;font-weight:900;color:#12ae62;cursor:pointer;border-radius:50%;width:36px;height:36px;box-shadow:0 4px 12px #0fc59013;display:flex;align-items:center;justify-content:center}
+
+/* ===== Mini Café ===== */
+.welcome-block{display:flex;flex-direction:column;align-items:center}
+.mini-cafe{display:flex;flex-direction:column;gap:12px;align-items:center;overflow:auto;padding:12px 12px 12px;min-height:0;scrollbar-gutter:stable}
+.mini-cafe .order{font-weight:700;color:#0c6a3a;background:#eaffea;border:1px solid #c8f5d9;padding:8px 12px;border-radius:12px}
+.mini-cafe .worktop{display:flex;gap:12px;align-items:flex-end;justify-content:center}
+.ingredients{display:grid;grid-template-columns:repeat(4,minmax(62px,1fr));gap:10px}
+.ingredient{background:#fff;border:1px solid #e3f7ea;border-radius:12px;padding:8px;cursor:pointer;box-shadow:0 2px 8px #0001;transition:transform .12s;font-size:12px}
+.ingredient:hover{transform:translateY(-1px)}
+.ingredient.used{opacity:.45;pointer-events:none}
+.ingredient img{width:48px;height:48px;object-fit:cover;border-radius:10px;display:block;margin:0 auto 6px}
+.ingredient.locked{opacity:.35;pointer-events:none;filter:grayscale(60%);cursor:not-allowed}
+.plate-wrap{position:relative;width:250px;height:160px}
+.plate{position:absolute;left:0;right:0;bottom:0;margin:auto;width:250px;height:90px;background:radial-gradient(ellipse at center,#fff 60%,#eee 100%);border:1px solid #e5e5e5;border-radius:0 0 120px 120px;box-shadow:0 6px 16px #0002 inset}
+.on-plate{position:absolute;left:50%;bottom:35px;transform:translateX(-50%);display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:210px}
+.badge-tip{font-size:12px;color:#3a3a3a;opacity:.8}
+.fly{position:fixed;z-index:3000;width:48px;height:48px;pointer-events:none;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s}
+.success-msg{color:#0d8a54;font-weight:700;margin-top:6px}
+.err-msg{color:#b00020;font-weight:600;margin-top:6px}
+.hint-row{display:flex;gap:8px;justify-content:center;align-items:center}
+.hint-toggle{background:transparent;border:1px dashed #c8f5d9;color:#0c6a3a;padding:4px 10px;border-radius:999px;font-size:12px;cursor:pointer}
+.recipe-hint{display:none;gap:6px;flex-wrap:wrap;justify-content:center;padding:6px 8px;background:rgba(202,255,179,.22);border:1px solid #c8f5d9;border-radius:12px;margin-top:6px}
+.recipe-hint.show{display:flex}
+.step-chip{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #e3f7ea;border-radius:10px;padding:4px 8px;font-size:12px;white-space:nowrap}
+.step-chip img{width:18px;height:18px;border-radius:4px}
+.step-arrow{opacity:.55}
+.mc-footer{position:static;display:flex;gap:8px;justify-content:center;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid #e8f5ee;border-radius:0 0 24px 24px}
+.mc-btn{padding:10px 16px;border:0;border-radius:10px;font-weight:700;cursor:pointer}
+#mcReset{background:#66bb6a;color:#fff} #mcClose{background:#e3e3e3;color:#333}
+@media (max-width:600px){
+  .mini-cafe .worktop{flex-direction:column;align-items:center;gap:8px}
+  .plate-wrap{margin-top:-12px;width:200px;height:140px}
+  .ingredients{grid-template-columns:repeat(2,minmax(80px,1fr));gap:14px}
+  .plate{width:200px;height:80px;border-radius:0 0 100px 100px}
+  .on-plate{width:170px;bottom:30px}
+}
+@media (max-width:380px){
+  .ingredients{grid-template-columns:repeat(2,minmax(72px,1fr));gap:12px}
+  .ingredient img{width:44px;height:44px}
+}
+/* Показувати повне зображення, висота змінна від оригіналу */
+#market-tab .bonus-card > img,
+#inventory-tab .bonus-card > img,
+.bonus-card > img{
+  width: 100%;
+  height: auto !important;      /* скасовуємо фіксовану висоту */
+  aspect-ratio: auto !important;/* скасовуємо 16/9 */
+  object-fit: contain;          /* гарантія, що нічого не ріже */
+  display: block;
+  border-radius: 12px;
+  margin: 0;
+}
+/* 1) Фікс кліків у модалці підтвердження */
+#confirmModal{ z-index: 2000; } /* вище за інші */
+#confirmModal::before{
+  z-index: -1;            /* повертаємо за модалку */
+  pointer-events: none;   /* на всяк: не перехоплює кліки */
+}
+#confirmModal .modal-box{ position: relative; z-index: 1; }
+
+/* 2) Повертаємо стилі кнопки "Активувати" в інвентарі */
+#inventory-tab .bonus-card button{
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  background: var(--accent-green);
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  transition: transform .1s, background .3s;
+}
+#inventory-tab .bonus-card button:active{ transform: scale(.96); }
+
+/* 3) На ринку стилі як було: (залишаємо вузьке вирівнювання під ціною) */
+#market-tab .bonus-left{ align-items: flex-start; }
+#market-tab .bonus-card button{ align-self: flex-start; }
+/* Кнопка заблокована (бонус закінчився) */
+.bonus-card button.expired-btn,
+.bonus-card button:disabled {
+  background: #999 !important;
+  color: #eee !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  filter: grayscale(100%) brightness(0.9);
+  transition: all 0.2s ease;
+}
+
+/* Напівпрозорий hover — залишає чіткий “заборонений” ефект */
+.bonus-card button.expired-btn:hover,
+.bonus-card button:disabled:hover {
+  transform: none;
+  filter: grayscale(100%) brightness(0.8);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+/* центруємо *** кліків відносно кнопки нижче */
+#market-tab .bonus-left .bonus-price{
+  margin-left: 4px; /* 4–6px — найестетичніше */
+}
