@@ -59,7 +59,7 @@ const happyHourEnd = 22;   // 18:00
     {
       name: "pitaGrylZChederom",
       title: "-50% на піту гриль з чедером",
-      description: "Скуштуй улюблену піту в рази дешевше!",
+      description: "Скуштуй улюблену піту в 2 рази дешевше!",
       price: 750,
       image: "pitagrylichederini.png",
       expiresAt: "2025-10-09"
