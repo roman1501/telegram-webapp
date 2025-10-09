@@ -62,7 +62,7 @@ const happyHourEnd = 22;   // 18:00
       description: "Скуштуй улюблену піту в 2 рази дешевше!",
       price: 750,
       image: "pitagrylichederini.png",
-      expiresAt: "2025-10-01"
+      expiresAt: "2025-10-10"
     },
     {
       name: "gyrosPlusRB",
