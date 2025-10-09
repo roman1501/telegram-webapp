@@ -46,7 +46,7 @@ const happyHourEnd = 22;   // 18:00
       description: "Смачна знижка на гірос у Greek House",
       price: 1000,
       image: "gyros.jpeg",
-      expiresAt: "2025-10-10"
+      expiresAt: "2025-10-15"
     },
     {
       name: "bigPotato",
@@ -54,7 +54,7 @@ const happyHourEnd = 22;   // 18:00
       description: "Обміняй кліки на хрустку картоплю!",
       price: 700,
       image: "kartoplafrivelyka.jpeg",
-      expiresAt: "2025-10-10"
+      expiresAt: "2025-10-15"
     },
     {
       name: "pitaGrylZChederom",
@@ -70,7 +70,7 @@ const happyHourEnd = 22;   // 18:00
       description: "Береш гірос? Прихопи і Red Bull за 0 грн!",
       price: 950,
       image: "gyrosPlusRB.png",
-      expiresAt: "2025-10-10"
+      expiresAt: "2025-10-16"
     },
     {
       name: "kalmarPytaGyros",
@@ -78,7 +78,7 @@ const happyHourEnd = 22;   // 18:00
       description: "240грн - задорого? Тоді тримай улюблену страву за 120грн!",
       price: 850,
       image: "kalmarPytaGyros.jpg",
-      expiresAt: "2025-10-10"
+      expiresAt: "2025-10-16"
     },
     {
       name: "pytaTynez",
